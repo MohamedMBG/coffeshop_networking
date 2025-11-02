@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.example.loyaltyapp.fragments.HomeFragment"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_activity"
+        android:name="com.example.loyaltyapp.fragments.ActivityFragment"
+        android:label="Activity"
+        tools:layout="@layout/fragment_activity" />
+
+    <fragment
+        android:id="@+id/scanFragment"
+        android:name="com.example.loyaltyapp.fragments.ScanFragment"
+        android:label="Scan"
+        tools:layout="@layout/fragment_scan" />
+
+    <fragment
+        android:id="@+id/rewardsFragment"
+        android:name="com.example.loyaltyapp.fragments.RewarsdFragment"
+        android:label="Rewards"
+        tools:layout="@layout/fragment_rewarsd" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.loyaltyapp.fragments.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>

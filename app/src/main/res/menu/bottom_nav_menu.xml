@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/homeFragment"
+        android:title="Home"
+        android:icon="@drawable/ic_home"/>
+
+    <item
+        android:id="@+id/navigation_activity"
+        android:title="Activity"
+        android:icon="@drawable/ic_history"/>
+
+    <item
+        android:id="@+id/scanFragment"
+        android:title="Scan"
+        android:icon="@drawable/ic_scan"/>
+
+    <item
+        android:id="@+id/rewardsFragment"
+        android:title="Rewards"
+        android:icon="@drawable/ic_gift"/>
+
+    <item
+        android:id="@+id/profileFragment"
+        android:title="Profile"
+        android:icon="@drawable/ic_profile"/>
+</menu>
