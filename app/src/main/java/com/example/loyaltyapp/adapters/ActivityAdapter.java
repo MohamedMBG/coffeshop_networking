@@ -33,41 +33,60 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int pos) {
         ActivityEvent e = data.get(pos);
 
-        // Title
+        // ---- Title
         String title;
-        if ("scan".equals(e.type))       title = "Scan" + (e.storeName.isEmpty() ? "" : " — " + e.storeName);
-        else if ("redemption".equals(e.type)) title = "Redemption";
-        else if ("bonus".equals(e.type)) title = "Bonus";
-        else                             title = "Activity";
-
+        if ("scan".equals(e.type)) {
+            title = "Scan" + (e.storeName != null && !e.storeName.isEmpty() ? " — " + e.storeName : "");
+        } else if ("redemption".equals(e.type) || "redeem".equals(e.type)) {
+            title = "Redemption";
+        } else if ("bonus".equals(e.type)) {
+            title = "Bonus";
+        } else {
+            title = "Activity";
+        }
         h.activityTitle.setText(title);
 
-        // Datetime
+        // ---- Date/time
         if (e.ts != null) {
             h.activityDateTime.setText(fmt.format(e.ts.toDate()));
         } else {
             h.activityDateTime.setText("—");
         }
 
-        // Points (+/-)
-        String sign = e.points >= 0 ? "+" : "";
-        h.activityPoints.setText(sign + e.points);
+        // ---- Points display
+        int displayPts = e.points;
+        // For redemption, ensure points are shown negative even if stored positive
+        if (("redemption".equals(e.type) || "redeem".equals(e.type)) && displayPts > 0) {
+            displayPts = -displayPts;
+        }
 
-        // Icon + bg by type
+        String sign = displayPts > 0 ? "+" : ""; // negatives already include '-'
+        h.activityPoints.setText(sign + displayPts);
+
+        // ---- Icon + background + text color
         if ("scan".equals(e.type)) {
+            // Earned points
             h.activityIcon.setImageResource(R.drawable.ic_scan);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn); // green-ish
-            h.activityPoints.setTextColor(0xFF4CAF50);
-        } else if ("redemption".equals(e.type)) {
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn); // green-ish bg
+            h.activityPoints.setTextColor(0xFF4CAF50); // 🟩 green
+        } else if ("redemption".equals(e.type) || "redeem".equals(e.type)) {
+            // Redeemed points
             h.activityIcon.setImageResource(R.drawable.ic_gift);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend); // red-ish
-            h.activityPoints.setTextColor(0xFFD32F2F);
-        } else {
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend); // red-ish bg (if you have one)
+            h.activityPoints.setTextColor(0xFFD32F2F); // 🔴 red
+        } else if ("bonus".equals(e.type)) {
+            // Bonus points
             h.activityIcon.setImageResource(R.drawable.ic_star);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus); // yellow-ish
-            h.activityPoints.setTextColor(0xFFFFC107);
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus); // yellow-ish bg
+            h.activityPoints.setTextColor(0xFFFFC107); // 🟡 yellow
+        } else {
+            // Default
+            h.activityIcon.setImageResource(R.drawable.ic_star);
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
+            h.activityPoints.setTextColor(0xFFFFC107); // 🟡 yellow default
         }
     }
+
 
     @Override
     public int getItemCount() { return data.size(); }
