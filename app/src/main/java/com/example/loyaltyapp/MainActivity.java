@@ -17,9 +17,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 public class MainActivity extends AppCompatActivity {
 
+
+    private ListenerRegistration gateListener;
     private static final int SPLASH_DURATION = 2000; // 2 seconds
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -41,6 +44,29 @@ public class MainActivity extends AppCompatActivity {
 
         // Delay splash for 2 seconds then decide destination
         new Handler(Looper.getMainLooper()).postDelayed(this::decideNextScreen, SPLASH_DURATION);
+    }
+
+    @Override protected void onStart() {
+        super.onStart();
+        gateListener = db.collection("meta").document("app_status")
+                .addSnapshotListener((doc, err) -> {
+                    if (err != null || doc == null) return;
+                    boolean active = Boolean.TRUE.equals(doc.getBoolean("isActive"));
+                    if (!active) {
+                        Intent i = new Intent(this, BlockedActivity.class);
+                        i.putExtra("reason", doc.getString("message"));
+                        startActivity(i);
+                        finish();
+                    }
+                });
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        if (gateListener != null) {
+            gateListener.remove();
+            gateListener = null;
+        }
     }
 
     private void decideNextScreen() {

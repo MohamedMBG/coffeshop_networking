@@ -23,6 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
@@ -32,7 +33,9 @@ public class LoyaltyActivity extends AppCompatActivity {
 
     private static final String KEY_SELECTED = "selected_menu";
 
+    private ListenerRegistration gateListener;
     private BottomNavigationView bottomNav;
+
     private int selectedItemId = R.id.homeFragment;
     private boolean profileRequired = false;
     private boolean suppressNavCallback = false;
@@ -78,6 +81,28 @@ public class LoyaltyActivity extends AppCompatActivity {
         // Ensure there is an initial fragment visible (prevents empty screen if listener not fired yet)
         if (getSupportFragmentManager().findFragmentByTag(String.valueOf(selectedItemId)) == null) {
             selectTabProgrammatically(selectedItemId);
+        }
+    }
+    @Override protected void onStart() {
+        super.onStart();
+        gateListener = db.collection("meta").document("app_status")
+                .addSnapshotListener((doc, err) -> {
+                    if (err != null || doc == null) return;
+                    boolean active = Boolean.TRUE.equals(doc.getBoolean("isActive"));
+                    if (!active) {
+                        Intent i = new Intent(this, BlockedActivity.class);
+                        i.putExtra("reason", doc.getString("message"));
+                        startActivity(i);
+                        finish();
+                    }
+                });
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        if (gateListener != null) {
+            gateListener.remove();
+            gateListener = null;
         }
     }
 

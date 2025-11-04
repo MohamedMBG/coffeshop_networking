@@ -1,0 +1,66 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5">
+
+    <!-- Icon placeholder using TextView as shape -->
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@android:drawable/ic_dialog_alert"
+        android:backgroundTint="#E53935"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Application Disabled"
+        android:textSize="24sp"
+        android:textColor="#212121"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/blockMsg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This application is temporarily unavailable. Please contact support for more information."
+        android:textSize="14sp"
+        android:textColor="#757575"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Support Button (Primary) -->
+    <Button
+        android:id="@+id/btnSupport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Contact Support"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1976D2"
+        android:paddingVertical="14dp"
+        android:layout_marginBottom="12dp"
+        android:textAllCaps="false"/>
+
+    <!-- Quit Button (Secondary) -->
+    <Button
+        android:id="@+id/btnQuit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quit"
+        android:textSize="16sp"
+        android:textColor="#757575"
+        android:background="@android:color/transparent"
+        android:paddingVertical="14dp"
+        android:textAllCaps="false"
+        style="?android:attr/borderlessButtonStyle"/>
+
+</LinearLayout>
