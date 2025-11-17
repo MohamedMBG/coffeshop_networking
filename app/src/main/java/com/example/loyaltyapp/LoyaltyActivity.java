@@ -1,6 +1,7 @@
 package com.example.loyaltyapp;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -50,6 +51,14 @@ public class LoyaltyActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loyalty); // must have nav_host_fragment & bottom_navigation
+
+        if (android.os.Build.VERSION.SDK_INT >= 33) {
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            }
+        }
+
 
         checkBirthdayReward();
 
@@ -271,4 +280,5 @@ public class LoyaltyActivity extends AppCompatActivity {
     }
 
     public interface ScrollToTop { void scrollToTop(); }
+
 }

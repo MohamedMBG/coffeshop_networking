@@ -189,7 +189,29 @@
                             android:clickable="true"
                             android:focusable="false"
                             android:textSize="16sp" />
+
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <RadioGroup
+                        android:layout_marginTop="12dp"
+                        android:layout_width="match_parent"
+                        android:orientation="horizontal"
+                        android:layout_height="match_parent" >
+
+                        <RadioButton
+                            android:id="@+id/radioButton"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Male" />
+
+                        <RadioButton
+                            android:id="@+id/radioButton2"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="Female" />
+                    </RadioGroup>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSaveProfile"

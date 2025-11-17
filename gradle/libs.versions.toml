@@ -21,6 +21,7 @@ zxingEmbedded = "4.3.0"
 zxingCore     = "3.5.3"
 
 glide = "4.16.0"
+firebaseMessaging = "25.0.1"
 
 [libraries]
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
@@ -44,6 +45,7 @@ firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

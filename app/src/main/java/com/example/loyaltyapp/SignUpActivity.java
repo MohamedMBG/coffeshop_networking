@@ -3,6 +3,7 @@ package com.example.loyaltyapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Patterns;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -11,12 +12,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.loyaltyapp.ApiService.VerifyResponse;
+import com.example.loyaltyapp.services.TokenRegistrar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,8 +35,11 @@ import retrofit2.Response;
  * 3) /api/verify -> { ok, email, customToken }
  * 4) signInWithCustomToken(customToken)
  * 5) Ensure user doc has full model; if missing fullName/birthday -> open LoyaltyActivity on Profile tab
+ * 6) Always upsert FCM token to backend devices collection (existing user or fresh sign-in)
  */
 public class SignUpActivity extends AppCompatActivity {
+
+    private static final String TAG = "SignUpActivity";
 
     private EditText emailInput;
     private FirebaseAuth auth;
@@ -52,9 +58,25 @@ public class SignUpActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.EmailInput);
         findViewById(R.id.continueButton).setOnClickListener(v -> onContinue());
 
+        // If already signed in, ensure device token is registered, then go to main.
         FirebaseUser u = auth.getCurrentUser();
-        if (u != null && !u.isAnonymous()) { goToMain(false); return; }
+        if (u != null && !u.isAnonymous()) {
+            Log.i(TAG, "User already signed in: " + u.getUid());
+            FirebaseMessaging.getInstance().getToken()
+                    .addOnSuccessListener(t -> {
+                        Log.i("FCM", "existing user getToken() -> " + t);
+                        if (t != null && !t.isEmpty()) {
+                            TokenRegistrar.ensureDevice(t, "client");
+                        }
+                    })
+                    .addOnFailureListener(e ->
+                            Log.w("FCM", "existing user getToken failed: " + e.getMessage())
+                    );
+            goToMain(false);
+            return;
+        }
 
+        // Handle deep link if the app was opened from the verification email.
         handleVerifyDeepLink(getIntent());
     }
 
@@ -116,9 +138,26 @@ public class SignUpActivity extends AppCompatActivity {
                         .addOnSuccessListener(cred -> {
                             FirebaseUser fu = cred.getUser();
                             if (fu == null) { toast("Auth error."); return; }
+
+                            Log.i(TAG, "Sign-in OK: " + fu.getUid());
                             ensureUserDocAndRoute(fu.getUid(), vr.email);
+
+                            // Force-get FCM token once after fresh sign-in and upsert it.
+                            FirebaseMessaging.getInstance().getToken()
+                                    .addOnSuccessListener(fcmToken -> {
+                                        Log.i("FCM", "fresh sign-in getToken() -> " + fcmToken);
+                                        if (fcmToken != null && !fcmToken.isEmpty()) {
+                                            TokenRegistrar.ensureDevice(fcmToken, "client");
+                                        }
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Log.w("FCM", "fresh sign-in getToken failed: " + e.getMessage())
+                                    );
                         })
-                        .addOnFailureListener(e -> toast("Sign-in failed: " + e.getMessage()));
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "signInWithCustomToken failed", e);
+                            toast("Sign-in failed: " + e.getMessage());
+                        });
             }
 
             @Override public void onFailure(Call<VerifyResponse> call, Throwable t) {
@@ -167,16 +206,16 @@ public class SignUpActivity extends AppCompatActivity {
                         boolean missingProfile =
                                 (fullName == null || fullName.trim().isEmpty()) ||
                                         (birthday == null || birthday.trim().isEmpty());
-                        // -> If missing, open app on Profile tab so your ProfileFragment shows the edit card
                         goToMain(missingProfile);
                     })
                     .addOnFailureListener(e -> {
+                        Log.e(TAG, "Profile init failed", e);
                         toast("Profile init failed: " + e.getMessage());
-                        // still try to open on Profile tab to let user fix it
                         goToMain(true);
                     });
 
         }).addOnFailureListener(e -> {
+            Log.e(TAG, "Profile check failed", e);
             toast("Profile check failed: " + e.getMessage());
             goToMain(true);
         });
