@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="?android:attr/colorBackground">
 
     <!-- Main Content with Pull-to-Refresh -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -217,6 +217,7 @@
                                 style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@color/chip_text_selector"
                                 android:text="All"
                                 android:checked="true"
                                 app:chipBackgroundColor="@color/chip_background_selector"
@@ -228,6 +229,7 @@
                                 style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@color/chip_text_selector"
                                 android:text="Scans"
                                 app:chipBackgroundColor="@color/chip_background_selector"
                                 app:chipStrokeColor="#8B5A3C"
@@ -240,6 +242,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Redemptions"
+                                android:textColor="@color/chip_text_selector"
                                 app:chipBackgroundColor="@color/chip_background_selector"
                                 app:chipStrokeColor="#8B5A3C"
                                 app:chipStrokeWidth="1dp"
@@ -251,6 +254,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Bonuses"
+                                android:textColor="@color/chip_text_selector"
                                 app:chipBackgroundColor="@color/chip_background_selector"
                                 app:chipStrokeColor="#8B5A3C"
                                 app:chipStrokeWidth="1dp"
@@ -274,26 +278,35 @@
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipThisWeek"
-                                style="@style/Widget.MaterialComponents.Chip.Filter"
+                                style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@color/chip_text_selector"
                                 android:text="This Week"
-                                app:chipBackgroundColor="@color/chip_background_selector"/>
+                                app:chipBackgroundColor="@color/chip_background_selector"
+                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeWidth="1dp"/>
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipThisMonth"
-                                style="@style/Widget.MaterialComponents.Chip.Filter"
+                                style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:textColor="@color/chip_text_selector"
                                 android:text="This Month"
+                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeWidth="1dp"
                                 app:chipBackgroundColor="@color/chip_background_selector"/>
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/chipCustomDate"
-                                style="@style/Widget.MaterialComponents.Chip.Filter"
+                                style="@style/Widget.MaterialComponents.Chip.Choice"
                                 android:layout_width="wrap_content"
+                                android:textColor="@color/chip_text_selector"
                                 android:layout_height="wrap_content"
                                 android:text="Custom Range"
+                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeWidth="1dp"
                                 app:chipBackgroundColor="@color/chip_background_selector"
                                 app:chipIcon="@drawable/ic_calendar"/>
                         </com.google.android.material.chip.ChipGroup>
@@ -339,7 +352,7 @@
                             android:text="No Activity Yet"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="#424242"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:layout_marginTop="16dp"/>
 
                         <TextView
@@ -347,7 +360,7 @@
                             android:layout_height="wrap_content"
                             android:text="Scan in store to earn points\nand start building your rewards"
                             android:textSize="14sp"
-                            android:textColor="#757575"
+                            android:textColor="?android:attr/textColorSecondary"
                             android:textAlignment="center"
                             android:layout_marginTop="8dp"/>
 

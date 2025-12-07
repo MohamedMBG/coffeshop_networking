@@ -6,6 +6,8 @@
     <string name="profile_title">Profile</string>
     <string name="profile_name_placeholder">Guest</string>
     <string name="profile_phone_placeholder">Add your phone</string>
+    <string name="profile_edit_phone_error">Add a valid phone number</string>
+    <string name="profile_address_placeholder">Add your adress</string>
     <string name="profile_points_placeholder">0 pts</string>
     <string name="profile_points_value">%1$d pts</string>
     <string name="profile_edit_button">Edit</string>
@@ -28,6 +30,9 @@
     <string name="profile_edit_email_hint">Email address</string>
     <string name="profile_edit_email_error">Please enter a valid email</string>
     <string name="profile_birthday_placeholder">Birthday: Add your birthday</string>
+    <string name="profile_gender_placeholder">Gender: Add your gender</string>
+    <string name="profile_gender_value">Gender: %1$s</string>
+    <string name="profile_gender_error">Please select your gender</string>
     <string name="profile_birthday_value">Birthday: %1$s</string>
     <string name="profile_edit_birthday_hint">Birthday</string>
     <string name="profile_edit_birthday_error">Please select your birthday</string>

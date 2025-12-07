@@ -10,15 +10,15 @@
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="20dp"
     app:cardUseCompatPadding="false"
-    app:cardElevation="0dp"
+    app:cardElevation="2dp"
     app:strokeWidth="0dp"
-    android:backgroundTint="@android:color/white">
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <!-- Thumbnail with modern rounded style -->
+        <!-- Thumbnail -->
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/imgThumb"
             android:layout_width="100dp"
@@ -40,7 +40,8 @@
             android:layout_marginEnd="8dp"
             app:layout_constraintStart_toEndOf="@id/imgThumb"
             app:layout_constraintEnd_toStartOf="@id/btnRedeem"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -48,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="17sp"
                 android:textStyle="bold"
-                android:textColor="#1A1A1A"
+                android:textColor="?android:attr/textColorPrimary"
                 android:letterSpacing="-0.01"
                 android:maxLines="2"
                 android:ellipsize="end"
@@ -59,12 +60,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="13sp"
-                android:textColor="#6B6B6B"
+                android:textColor="?android:attr/textColorSecondary"
                 android:layout_marginTop="4dp"
                 android:maxLines="1"
                 android:ellipsize="end"
                 tools:text="Single shot • Dine-in" />
-
 
             <!-- Points Badge -->
             <LinearLayout
@@ -92,12 +92,12 @@
                     tools:text="50" />
             </LinearLayout>
 
-            <!-- Price + Points Badge -->
+            <!-- Price -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="4dp"
                 android:gravity="center_vertical">
 
                 <TextView
@@ -106,9 +106,8 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:textColor="#1A1A1A"
+                    android:textColor="?android:attr/textColorPrimary"
                     tools:text="18 MAD" />
-
             </LinearLayout>
         </LinearLayout>
 
@@ -122,10 +121,12 @@
             android:textStyle="bold"
             android:enabled="false"
             android:minWidth="0dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingStart="16dp"
+            android:textColor="@color/white"
+            android:paddingEnd="16dp"
             app:cornerRadius="14dp"
             app:backgroundTint="#8B5A3C"
+            android:layout_marginEnd="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

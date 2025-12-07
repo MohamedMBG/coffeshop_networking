@@ -2,4 +2,9 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- Light mode: very light grey (not pure white) -->
+    <color name="statusBarLight">#FAFAFA</color>
+
+    <!-- Dark mode: almost black, like Instagram -->
+    <color name="statusBarDark">#121212</color>
 </resources>

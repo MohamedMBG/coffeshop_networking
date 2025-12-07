@@ -2,5 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.LoyaltyApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
+        <!-- Status bar for DARK mode -->
+        <item name="android:statusBarColor">@color/statusBarDark</item>
+        <!-- Light icons on dark background -->
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

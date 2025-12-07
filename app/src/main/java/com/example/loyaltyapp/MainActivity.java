@@ -88,8 +88,8 @@ public class MainActivity extends AppCompatActivity {
     private void handleUserDoc(DocumentSnapshot snapshot) {
         boolean verified = snapshot.exists() && Boolean.TRUE.equals(snapshot.getBoolean("isVerified"));
 
-        if (verified) goToLoyalty();
-        else goToSignUp();
+        if (verified) goToLoyalty(false);
+        else goToLoyalty(true);
     }
 
     private void goToSignUp() {
@@ -97,8 +97,10 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    private void goToLoyalty() {
-        startActivity(new Intent(this, LoyaltyActivity.class));
+    private void goToLoyalty(boolean requireProfile) {
+        Intent i = new Intent(this, LoyaltyActivity.class);
+        i.putExtra("require_profile", requireProfile);
+        startActivity(i);
         finish();
     }
 }

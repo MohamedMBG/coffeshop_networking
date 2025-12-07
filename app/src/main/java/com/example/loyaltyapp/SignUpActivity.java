@@ -179,6 +179,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             String fullName = exists ? doc.getString("fullName") : null;
             String birthday = exists ? doc.getString("birthday") : null;
+            String gender   = exists ? doc.getString("gender") : null;
             Number pointsN  = exists ? doc.getLong("points") : null;
             Number visitsN  = exists ? doc.getLong("visits") : null;
             Boolean verifiedB = exists ? doc.getBoolean("isVerified") : null;
@@ -186,11 +187,13 @@ public class SignUpActivity extends AppCompatActivity {
 
             int points = pointsN == null ? 0 : pointsN.intValue();
             int visits = visitsN == null ? 0 : visitsN.intValue();
-            boolean isVerified = verifiedB != null ? verifiedB : true;
+            boolean isVerified = verifiedB != null ? verifiedB : false;
 
             Map<String, Object> up = new HashMap<>();
             up.put("uid", uid);
             up.put("email", emailInDoc != null ? emailInDoc.toLowerCase() : emailLower);
+            up.put("gender", gender != null ? gender : "");
+            up.put("isVerified", isVerified);
             if (!exists) {
                 up.put("fullName", fullName != null ? fullName : "");
                 up.put("birthday", birthday != null ? birthday : "");
@@ -205,7 +208,9 @@ public class SignUpActivity extends AppCompatActivity {
                     .addOnSuccessListener(unused -> {
                         boolean missingProfile =
                                 (fullName == null || fullName.trim().isEmpty()) ||
-                                        (birthday == null || birthday.trim().isEmpty());
+                                        (birthday == null || birthday.trim().isEmpty()) ||
+                                        (gender == null || gender.trim().isEmpty()) ||
+                                        !isVerified;
                         goToMain(missingProfile);
                     })
                     .addOnFailureListener(e -> {
@@ -225,6 +230,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void goToMain(boolean forceProfile) {
         Intent i = new Intent(this, LoyaltyActivity.class);
         i.putExtra("force_profile", forceProfile);
+        i.putExtra("require_profile", forceProfile);
         startActivity(i);
         finish();
     }

@@ -2,6 +2,7 @@ package com.example.loyaltyapp;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -77,9 +78,15 @@ public class LoyaltyActivity extends AppCompatActivity {
         uid = user.getUid();
 
         bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setItemActiveIndicatorColor(null);
+
+        // ou pour mettre une couleur transparente :
+        bottomNav.setItemActiveIndicatorColor(ColorStateList.valueOf(getResources().getColor(android.R.color.transparent, getTheme())));
         setupBottomNav();
 
-        boolean requireProfileExtra = getIntent().getBooleanExtra("require_profile", false);
+        boolean requireProfileExtra = getIntent().getBooleanExtra("require_profile", false)
+                || getIntent().getBooleanExtra("force_profile", false);
+
         if (requireProfileExtra) {
             setProfileRequired(true, false);
             selectTabProgrammatically(R.id.profileFragment);
@@ -239,10 +246,13 @@ public class LoyaltyActivity extends AppCompatActivity {
         if (doc != null && doc.exists()) {
             String name = doc.getString("fullName");
             String bday = doc.getString("birthday");
+            String gender = doc.getString("gender");
+            Boolean verified = doc.getBoolean("isVerified");
             missing = (name == null || name.trim().isEmpty()
-                    || bday == null || bday.trim().isEmpty());
+                    || bday == null || bday.trim().isEmpty()
+                    || gender == null || gender.trim().isEmpty()
+                    || !Boolean.TRUE.equals(verified));
         }
-
         if (missing) {
             setProfileRequired(true, true);
             selectTabProgrammatically(R.id.profileFragment);

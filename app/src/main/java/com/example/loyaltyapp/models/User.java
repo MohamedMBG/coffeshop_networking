@@ -5,6 +5,7 @@ public class User {
     private String email;
     private String fullName;
     private String birthday;
+    private String gender;
     private int points;
     private int visits;
     private boolean isVerified;
@@ -12,12 +13,13 @@ public class User {
     // Required empty constructor for Firestore
     public User() {}
 
-    public User(String uid, String email, String fullName, String birthday,
+    public User(String uid, String email, String fullName, String birthday, String gender,
                 int points, int visits, boolean isVerified) {
         this.uid = uid;
         this.email = email;
         this.fullName = fullName;
         this.birthday = birthday;
+        this.gender = gender;
         this.points = points;
         this.visits = visits;
         this.isVerified = isVerified;
@@ -35,6 +37,9 @@ public class User {
 
     public String getBirthday() { return birthday; }
     public void setBirthday(String birthday) { this.birthday = birthday; }
+
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
 
     public int getPoints() { return points; }
     public void setPoints(int points) { this.points = points; }

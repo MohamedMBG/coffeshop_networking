@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected: Brand Color -->
+    <item android:color="#FFFFFF" android:state_checked="true" />
+
+    <!-- Default: Grey (Adaptive for Dark Mode if needed, usually standard grey works) -->
+    <item android:color="#BC8B70" />
+</selector>

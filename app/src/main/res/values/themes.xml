@@ -3,6 +3,11 @@
     <style name="Base.Theme.LoyaltyApp" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">#DEDEDE</item>
+        <!-- Status bar for LIGHT mode -->
+        <item name="android:statusBarColor">@color/statusBarLight</item>
+        <!-- Dark icons on light background -->
+        <item name="android:windowLightStatusBar">true</item>
+
     </style>
 
     <style name="Theme.LoyaltyApp" parent="Base.Theme.LoyaltyApp" />

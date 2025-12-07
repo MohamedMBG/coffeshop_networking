@@ -64,12 +64,12 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
         h.activityPoints.setText(sign + displayPts);
 
         // ---- Icon + background + text color
-        if ("scan".equals(e.type)) {
+        if ("scan".equals(e.type) || "earn".equals(e.type)) {
             // Earned points
             h.activityIcon.setImageResource(R.drawable.ic_scan);
             h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn); // green-ish bg
             h.activityPoints.setTextColor(0xFF4CAF50); // 🟩 green
-        } else if ("redemption".equals(e.type) || "redeem".equals(e.type)) {
+        } else if ("redemption".equals(e.type) || "redeem".equals(e.type) || "spend".equals(e.type)) {
             // Redeemed points
             h.activityIcon.setImageResource(R.drawable.ic_gift);
             h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend); // red-ish bg (if you have one)

@@ -5,15 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:backgroundTint="@color/white">
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:backgroundTint="@color/white"
-        app:elevation="4dp">
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,7 +43,7 @@
                             android:text="B&amp;B Coffee Shop"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="#212121"/>
+                            android:textColor="?android:attr/textColorPrimary"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -60,7 +58,7 @@
                             android:layout_height="16dp"
                             android:src="@drawable/ic_location"
                             android:contentDescription="Location"
-                            app:tint="#757575"
+                            app:tint="?android:attr/textColorSecondary"
                             android:layout_marginEnd="4dp"/>
 
                         <TextView
@@ -68,7 +66,7 @@
                             android:layout_height="wrap_content"
                             android:text="Agdal, Rabat"
                             android:textSize="14sp"
-                            android:textColor="#757575"/>
+                            android:textColor="?android:attr/textColorSecondary"/>
                     </LinearLayout>
                 </LinearLayout>
 
@@ -86,7 +84,7 @@
                         android:layout_height="24dp"
                         android:src="@drawable/ic_store"
                         android:contentDescription="Cart"
-                        app:tint="#424242"/>
+                        app:tint="?android:attr/textColorPrimary"/>
 
                     <TextView
                         android:id="@+id/cartBadge"
@@ -113,171 +111,189 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?attr/colorSurface"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?attr/colorSurface"
             android:orientation="vertical"
             android:padding="16dp">
 
             <!-- Promo Banner -->
             <androidx.cardview.widget.CardView
-                android:id="@+id/bannerCard"                     
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="20dp">
+                android:id="@+id/bannerCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="20dp">
 
-            <RelativeLayout
-                android:id="@+id/bannerRoot"                  
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/promo_gradient"
-            android:padding="20dp">
+                <RelativeLayout
+                    android:id="@+id/bannerRoot"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/promo_gradient"
+                    android:padding="20dp">
 
-            <LinearLayout
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvBannerBadge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Special Offer"
+                            android:textColor="@android:color/white"
+                            android:textSize="14sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:id="@+id/tvBannerTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Buy 1 Get 1 Free"
+                            android:textColor="@android:color/white"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp"/>
+
+                        <TextView
+                            android:id="@+id/tvBannerSubtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="On all coffee drinks today!"
+                            android:textColor="#FFEBEE"
+                            android:textSize="14sp"
+                            android:layout_marginTop="4dp"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/ivBannerIcon"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:alpha="0.7"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_offer"
+                        app:tint="@android:color/white"/>
+
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Categories -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/tvBannerBadge"       
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Special Offer"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/tvBannerTitle"       
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Buy 1 Get 1 Free"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:text="Categories"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"/>
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="12dp"/>
 
-                <TextView
-                    android:id="@+id/tvBannerSubtitle"    
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="20dp">
+
+                <LinearLayout
+                    android:id="@+id/categoriesContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="All"
+                        android:textColor="@android:color/white"
+                        android:layout_marginEnd="8dp"
+                        app:chipBackgroundColor="#8B5A3C"
+                        app:chipCornerRadius="20dp"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCoffee"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Coffee"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        app:chipBackgroundColor="?attr/colorSurface"
+                        app:chipStrokeColor="?android:attr/textColorSecondary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipCornerRadius="20dp"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipTea"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tea"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        app:chipBackgroundColor="?attr/colorSurface"
+                        app:chipStrokeColor="?android:attr/textColorSecondary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipCornerRadius="20dp"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipPastries"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pastries"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        app:chipBackgroundColor="?attr/colorSurface"
+                        app:chipStrokeColor="?android:attr/textColorSecondary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipCornerRadius="20dp"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipBreakfast"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Breakfast"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        app:chipBackgroundColor="?attr/colorSurface"
+                        app:chipStrokeColor="?android:attr/textColorSecondary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipCornerRadius="20dp"/>
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipLunch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lunch"
+                        app:chipBackgroundColor="?attr/colorSurface"
+                        android:textColor="?android:attr/textColorPrimary"
+                        app:chipStrokeColor="?android:attr/textColorSecondary"
+                        app:chipStrokeWidth="1dp"
+                        app:chipCornerRadius="20dp"/>
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Popular Items Section -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="On all coffee drinks today!"
-                android:textColor="#FFEBEE"
-                android:textSize="14sp"
-                android:layout_marginTop="4dp"/>
-            </LinearLayout>
+                android:text="Popular Items"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorPrimary"
+                android:layout_marginBottom="12dp"/>
 
-                <ImageView
-                    android:id="@+id/ivBannerIcon"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:alpha="0.7"
-                    android:layout_alignParentEnd="true"
-                    android:src="@drawable/ic_offer" />
-
-            </RelativeLayout>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Categories -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Categories"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#212121"
-        android:layout_marginBottom="12dp"/>
-
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:layout_marginBottom="20dp">
-
-        <LinearLayout
-            android:id="@+id/categoriesContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
-                android:layout_width="wrap_content"
+            <!-- RecyclerView for Menu Items -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/menuRecyclerView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="All"
-                android:textColor="@android:color/white"
-                android:layout_marginEnd="8dp"
-                app:chipBackgroundColor="#8B5A3C"
-                app:chipCornerRadius="20dp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipCoffee"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Coffee"
-                android:layout_marginEnd="8dp"
-                app:chipBackgroundColor="#E0E0E0"
-                app:chipCornerRadius="20dp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTea"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tea"
-                android:layout_marginEnd="8dp"
-                app:chipBackgroundColor="#E0E0E0"
-                app:chipCornerRadius="20dp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPastries"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pastries"
-                android:layout_marginEnd="8dp"
-                app:chipBackgroundColor="#E0E0E0"
-                app:chipCornerRadius="20dp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipBreakfast"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Breakfast"
-                android:layout_marginEnd="8dp"
-                app:chipBackgroundColor="#E0E0E0"
-                app:chipCornerRadius="20dp"/>
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipLunch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lunch"
-                app:chipBackgroundColor="#E0E0E0"
-                app:chipCornerRadius="20dp"/>
+                android:nestedScrollingEnabled="false"
+                tools:listitem="@layout/menu_item"/>
         </LinearLayout>
-    </HorizontalScrollView>
-
-    <!-- Popular Items Section -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Popular Items"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:textColor="#212121"
-        android:layout_marginBottom="12dp"/>
-
-    <!-- RecyclerView for Menu Items -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/menuRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:nestedScrollingEnabled="false"
-        tools:listitem="@layout/menu_item"/>
-</LinearLayout>
     </androidx.core.widget.NestedScrollView>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
