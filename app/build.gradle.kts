@@ -47,6 +47,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    
+    // Testing libraries
+    testImplementation("org.robolectric:robolectric:4.10.3")
+    testImplementation("org.mockito:mockito-core:4.11.0")
     //added
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
