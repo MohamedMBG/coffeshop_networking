@@ -201,6 +201,7 @@
                     android:padding="20dp">
 
                     <TextView
+                        android:id="@+id/tvPunchCardTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Loyalty Punch Card"

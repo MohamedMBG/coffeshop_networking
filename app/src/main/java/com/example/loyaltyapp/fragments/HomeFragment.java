@@ -125,7 +125,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void updatePunchCard(int visits) {
-        int cupsFilled = visits % 10;
+        // Evaluate if they have a completed reward (visits mod 10 == 0 but more than 0
+        // visits)
+        boolean hasRewardEarned = visits > 0 && (visits % 10 == 0);
+
+        // If they just hit exactly a multiple of 10, visually show them 10 FULL cups
+        // instead of 0!
+        int cupsFilled = hasRewardEarned ? 10 : visits % 10;
 
         for (int i = 0; i < 10; i++) {
             android.widget.ImageView cup = (android.widget.ImageView) binding.gridPunchCard.getChildAt(i);
@@ -146,11 +152,23 @@ public class HomeFragment extends Fragment {
             }
         }
 
-        if (cupsFilled == 0 && visits > 0) {
-            binding.tvPunchCardSubtitle.setText("You have a free coffee waiting!");
+        if (hasRewardEarned) {
+            // Re-style UI slightly to congratulate them!
+            binding.punchCardView.setCardBackgroundColor(0xFFFFF9C4); // Light Yellow to highlight
+            binding.tvPunchCardSubtitle.setText(R.string.punch_card_reward_earned_subtitle);
+            if (binding.punchCardView.findViewById(R.id.tvPunchCardTitle) != null) {
+                ((android.widget.TextView) binding.punchCardView.findViewById(R.id.tvPunchCardTitle))
+                        .setText(R.string.punch_card_reward_ready);
+            }
         } else {
+            // Restore normal look
+            binding.punchCardView.setCardBackgroundColor(getResources().getColor(android.R.color.white, null));
             int needed = 10 - cupsFilled;
-            binding.tvPunchCardSubtitle.setText(needed + " more coffees until your next free one!");
+            binding.tvPunchCardSubtitle.setText(getString(R.string.punch_card_needed, needed));
+            if (binding.punchCardView.findViewById(R.id.tvPunchCardTitle) != null) {
+                ((android.widget.TextView) binding.punchCardView.findViewById(R.id.tvPunchCardTitle))
+                        .setText(R.string.punch_card_title);
+            }
         }
     }
 
