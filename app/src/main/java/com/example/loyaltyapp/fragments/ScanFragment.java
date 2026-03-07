@@ -57,6 +57,8 @@ public class ScanFragment extends Fragment {
     // 4 Hours in Milliseconds
     private static final long VISIT_TIME_WINDOW_MILLIS = 4 * 60 * 60 * 1000;
 
+    private com.example.loyaltyapp.databinding.FragmentScanBinding binding;
+
     // UI VIEWS
     private DecoratedBarcodeView barcodeView;
     private ImageView btnFlashlight, btnClose;
@@ -80,7 +82,8 @@ public class ScanFragment extends Fragment {
     private final BarcodeCallback scanCallback = new BarcodeCallback() {
         @Override
         public void barcodeResult(BarcodeResult result) {
-            if (result == null || result.getText() == null) return;
+            if (result == null || result.getText() == null)
+                return;
 
             long now = System.currentTimeMillis();
             if (isProcessingScan || (now - lastScanTimestamp) < DEBOUNCE_MS) {
@@ -98,9 +101,11 @@ public class ScanFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_scan, container, false);
-        initializeViews(view);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        binding = com.example.loyaltyapp.databinding.FragmentScanBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        initializeViews();
         setupClickListeners();
         setupPermissionLauncher();
         checkPermissionAndStart();
@@ -110,7 +115,8 @@ public class ScanFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (hasCameraPermission()) resumeScanner();
+        if (hasCameraPermission())
+            resumeScanner();
     }
 
     @Override
@@ -121,25 +127,30 @@ public class ScanFragment extends Fragment {
         isProcessingScan = false;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
     // ============================================================================================
     // INIT
     // ============================================================================================
 
-    private void initializeViews(View v) {
-        barcodeView    = v.findViewById(R.id.barcodeScanner);
-        btnFlashlight  = v.findViewById(R.id.btnFlashlight);
-        btnClose       = v.findViewById(R.id.btnClose);
-        successOverlay = v.findViewById(R.id.successOverlay);
-        errorOverlay   = v.findViewById(R.id.errorOverlay);
-        successMessage = v.findViewById(R.id.successMessage);
-        successDetails = v.findViewById(R.id.successDetails);
-        errorMessage   = v.findViewById(R.id.errorMessage);
-        btnRetry       = v.findViewById(R.id.btnRetry);
-        btnManualEntry = v.findViewById(R.id.btnManualEntry);
+    private void initializeViews() {
+        barcodeView = binding.barcodeScanner;
+        btnFlashlight = binding.btnFlashlight;
+        btnClose = binding.btnClose;
+        successOverlay = binding.successOverlay;
+        errorOverlay = binding.errorOverlay;
+        successMessage = binding.successMessage;
+        successDetails = binding.successDetails;
+        errorMessage = binding.errorMessage;
+        btnRetry = binding.btnRetry;
+        btnManualEntry = binding.btnManualEntry;
 
         if (btnManualEntry != null) {
-            btnManualEntry.setOnClickListener(view ->
-                    showError("Manual entry is not implemented yet"));
+            btnManualEntry.setOnClickListener(view -> showError("Manual entry is not implemented yet"));
         }
 
         barcodeView.decodeContinuous(scanCallback);
@@ -174,8 +185,8 @@ public class ScanFragment extends Fragment {
                 return;
             }
 
-            String codeId     = parts[1];
-            String qrUserUid  = parts[2];
+            String codeId = parts[1];
+            String qrUserUid = parts[2];
             String costString = parts[3];
 
             int qrCostPoints;
@@ -206,23 +217,23 @@ public class ScanFragment extends Fragment {
             return;
         }
 
-        final DocumentReference voucherRef  = db.collection("earn_codes").document(voucherId);
-        final DocumentReference userRef     = db.collection("users").document(currentUser.getUid());
+        final DocumentReference voucherRef = db.collection("earn_codes").document(voucherId);
+        final DocumentReference userRef = db.collection("users").document(currentUser.getUid());
         final DocumentReference activityRef = userRef.collection("activities").document();
 
         db.runTransaction(transaction -> {
             DocumentSnapshot voucherSnap = transaction.get(voucherRef);
-            DocumentSnapshot userSnap    = transaction.get(userRef);
+            DocumentSnapshot userSnap = transaction.get(userRef);
 
             if (!voucherSnap.exists()) {
                 throw new FirebaseFirestoreException("Voucher not found", FirebaseFirestoreException.Code.NOT_FOUND);
             }
 
-            String status      = voucherSnap.getString("status");
-            Long validForSec   = voucherSnap.getLong("validForSec");
-            Timestamp createdAt= voucherSnap.getTimestamp("createdAt");
-            Long pointsLong    = voucherSnap.getLong("points");
-            int pointsVal      = pointsLong != null ? pointsLong.intValue() : 0;
+            String status = voucherSnap.getString("status");
+            Long validForSec = voucherSnap.getLong("validForSec");
+            Timestamp createdAt = voucherSnap.getTimestamp("createdAt");
+            Long pointsLong = voucherSnap.getLong("points");
+            int pointsVal = pointsLong != null ? pointsLong.intValue() : 0;
 
             if (status == null) {
                 throw new FirebaseFirestoreException("Invalid voucher", FirebaseFirestoreException.Code.DATA_LOSS);
@@ -308,8 +319,10 @@ public class ScanFragment extends Fragment {
             showSuccess("+" + points + " Points", subMsg);
         }).addOnFailureListener(e -> {
             String msg = e.getMessage() != null ? e.getMessage() : "Transaction failed";
-            if (msg.contains("not found")) msg = "Invalid QR Code";
-            if (msg.toLowerCase().contains("expired")) msg = "This code has expired";
+            if (msg.contains("not found"))
+                msg = "Invalid QR Code";
+            if (msg.toLowerCase().contains("expired"))
+                msg = "This code has expired";
             showError(msg);
         });
     }
@@ -319,8 +332,8 @@ public class ScanFragment extends Fragment {
     // ============================================================================================
 
     private void executeSpendTransaction(@NonNull String redeemDocId,
-                                         @NonNull String qrUserUid,
-                                         int qrCostPoints) {
+            @NonNull String qrUserUid,
+            int qrCostPoints) {
 
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser == null) {
@@ -334,13 +347,13 @@ public class ScanFragment extends Fragment {
             return;
         }
 
-        final DocumentReference redeemRef  = db.collection("redeem_codes").document(redeemDocId);
-        final DocumentReference userRef    = db.collection("users").document(currentUser.getUid());
-        final DocumentReference activityRef= userRef.collection("activities").document();
+        final DocumentReference redeemRef = db.collection("redeem_codes").document(redeemDocId);
+        final DocumentReference userRef = db.collection("users").document(currentUser.getUid());
+        final DocumentReference activityRef = userRef.collection("activities").document();
 
         db.runTransaction(transaction -> {
             DocumentSnapshot redeemSnap = transaction.get(redeemRef);
-            DocumentSnapshot userSnap   = transaction.get(userRef);
+            DocumentSnapshot userSnap = transaction.get(userRef);
 
             if (!redeemSnap.exists()) {
                 throw new FirebaseFirestoreException("Redemption code not found",
@@ -354,11 +367,11 @@ public class ScanFragment extends Fragment {
                         FirebaseFirestoreException.Code.PERMISSION_DENIED);
             }
 
-            String status   = redeemSnap.getString("status");
-            String type     = redeemSnap.getString("type");
-            Long costLong   = redeemSnap.getLong("costPoints");
+            String status = redeemSnap.getString("status");
+            String type = redeemSnap.getString("type");
+            Long costLong = redeemSnap.getLong("costPoints");
             String itemName = redeemSnap.getString("itemName");
-            int costPoints  = costLong != null ? costLong.intValue() : qrCostPoints;
+            int costPoints = costLong != null ? costLong.intValue() : qrCostPoints;
 
             if (type == null || !"REDEEM".equalsIgnoreCase(type)) {
                 throw new FirebaseFirestoreException("Wrong code type",
@@ -407,13 +420,13 @@ public class ScanFragment extends Fragment {
 
             return itemName != null ? itemName : "Reward";
 
-        }).addOnSuccessListener(itemName ->
-                showSuccess("Confirmed!", "Redeemed: " + itemName)
-        ).addOnFailureListener(e -> {
-            String msg = e.getMessage() != null ? e.getMessage() : "Redemption failed";
-            if (msg.toLowerCase().contains("not found")) msg = "Invalid redeem code";
-            showError(msg);
-        });
+        }).addOnSuccessListener(itemName -> showSuccess("Confirmed!", "Redeemed: " + itemName))
+                .addOnFailureListener(e -> {
+                    String msg = e.getMessage() != null ? e.getMessage() : "Redemption failed";
+                    if (msg.toLowerCase().contains("not found"))
+                        msg = "Invalid redeem code";
+                    showError(msg);
+                });
     }
 
     // ============================================================================================
@@ -422,11 +435,15 @@ public class ScanFragment extends Fragment {
 
     private void showSuccess(String main, String sub) {
         runOnUi(() -> {
-            if (!isAdded()) return;
+            if (!isAdded())
+                return;
             pauseScanner();
-            if (successMessage != null) successMessage.setText(main);
-            if (successDetails != null) successDetails.setText(sub);
-            if (successOverlay != null) successOverlay.setVisibility(View.VISIBLE);
+            if (successMessage != null)
+                successMessage.setText(main);
+            if (successDetails != null)
+                successDetails.setText(sub);
+            if (successOverlay != null)
+                successOverlay.setVisibility(View.VISIBLE);
 
             uiHandler.postDelayed(() -> {
                 hideSuccess();
@@ -446,10 +463,13 @@ public class ScanFragment extends Fragment {
 
     private void showError(String msg) {
         runOnUi(() -> {
-            if (!isAdded()) return;
+            if (!isAdded())
+                return;
             pauseScanner();
-            if (errorMessage != null) errorMessage.setText(msg);
-            if (errorOverlay != null) errorOverlay.setVisibility(View.VISIBLE);
+            if (errorMessage != null)
+                errorMessage.setText(msg);
+            if (errorOverlay != null)
+                errorOverlay.setVisibility(View.VISIBLE);
         });
     }
 
@@ -488,35 +508,41 @@ public class ScanFragment extends Fragment {
     // ============================================================================================
 
     private void setupPermissionLauncher() {
-        cameraPermissionLauncher =
-                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) resumeScanner();
-                    else showToast("Camera permission required");
+        cameraPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted)
+                        resumeScanner();
+                    else
+                        showToast("Camera permission required");
                 });
     }
 
     private void checkPermissionAndStart() {
-        if (hasCameraPermission()) resumeScanner();
-        else cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
+        if (hasCameraPermission())
+            resumeScanner();
+        else
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA);
     }
 
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.CAMERA
-        ) == PackageManager.PERMISSION_GRANTED;
+                requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void resumeScanner() {
-        if (isAdded() && barcodeView != null) barcodeView.resume();
+        if (isAdded() && barcodeView != null)
+            barcodeView.resume();
     }
 
     private void pauseScanner() {
-        if (barcodeView != null) barcodeView.pause();
+        if (barcodeView != null)
+            barcodeView.pause();
     }
 
     private void toggleFlashlight() {
         try {
-            if (barcodeView == null) return;
+            if (barcodeView == null)
+                return;
             if (isTorchOn) {
                 barcodeView.setTorchOff();
                 isTorchOn = false;
@@ -533,21 +559,25 @@ public class ScanFragment extends Fragment {
 
     private void triggerHapticFeedback(int milliseconds) {
         try {
-            if (!isAdded()) return;
+            if (!isAdded())
+                return;
             Vibrator v = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
-            if (v == null) return;
+            if (v == null)
+                return;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 v.vibrate(VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
-                //noinspection deprecation
+                // noinspection deprecation
                 v.vibrate(milliseconds);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private void safelyExitFragment() {
         try {
             requireActivity().getOnBackPressedDispatcher().onBackPressed();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 }

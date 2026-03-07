@@ -34,14 +34,16 @@ import retrofit2.Response;
  * 2) Deep link myapp://verify?token=... opens here
  * 3) /api/verify -> { ok, email, customToken }
  * 4) signInWithCustomToken(customToken)
- * 5) Ensure user doc has full model; if missing fullName/birthday -> open LoyaltyActivity on Profile tab
- * 6) Always upsert FCM token to backend devices collection (existing user or fresh sign-in)
+ * 5) Ensure user doc has full model; if missing fullName/birthday -> open
+ * LoyaltyActivity on Profile tab
+ * 6) Always upsert FCM token to backend devices collection (existing user or
+ * fresh sign-in)
  */
 public class SignUpActivity extends AppCompatActivity {
 
     private static final String TAG = "SignUpActivity";
 
-    private EditText emailInput;
+    private com.example.loyaltyapp.databinding.ActivitySignUpBinding binding;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private ApiService api;
@@ -49,14 +51,14 @@ public class SignUpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
+        binding = com.example.loyaltyapp.databinding.ActivitySignUpBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         auth = FirebaseAuth.getInstance();
-        db   = FirebaseFirestore.getInstance();
-        api  = ApiClient.getClient().create(ApiService.class);
+        db = FirebaseFirestore.getInstance();
+        api = ApiClient.getClient().create(ApiService.class);
 
-        emailInput = findViewById(R.id.EmailInput);
-        findViewById(R.id.continueButton).setOnClickListener(v -> onContinue());
+        binding.continueButton.setOnClickListener(v -> onContinue());
 
         // If already signed in, ensure device token is registered, then go to main.
         FirebaseUser u = auth.getCurrentUser();
@@ -69,9 +71,7 @@ public class SignUpActivity extends AppCompatActivity {
                             TokenRegistrar.ensureDevice(t, "client");
                         }
                     })
-                    .addOnFailureListener(e ->
-                            Log.w("FCM", "existing user getToken failed: " + e.getMessage())
-                    );
+                    .addOnFailureListener(e -> Log.w("FCM", "existing user getToken failed: " + e.getMessage()));
             goToMain(false);
             return;
         }
@@ -88,23 +88,27 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void onContinue() {
-        String email = emailInput.getText() == null ? "" : emailInput.getText().toString().trim();
+        String email = binding.EmailInput.getText() == null ? "" : binding.EmailInput.getText().toString().trim();
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            emailInput.setError("Enter a valid email"); return;
+            binding.EmailInput.setError("Enter a valid email");
+            return;
         }
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
 
         api.registerEmail(body).enqueue(new Callback<Map<String, Object>>() {
-            @Override public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> resp) {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> resp) {
                 if (resp.isSuccessful() && resp.body() != null && Boolean.TRUE.equals(resp.body().get("ok"))) {
                     toast("Verification email sent. Check your inbox.");
                 } else {
                     toast("Failed to send verification.");
                 }
             }
-            @Override public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 toast("Network error: " + t.getMessage());
             }
         });
@@ -112,14 +116,16 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void handleVerifyDeepLink(@NonNull Intent intent) {
         Uri data = intent.getData();
-        if (data == null) return;
+        if (data == null)
+            return;
 
         String token = null;
         if ("myapp".equalsIgnoreCase(data.getScheme()) && "verify".equalsIgnoreCase(data.getHost())) {
             token = data.getQueryParameter("token");
         }
 
-        if (token == null || token.isEmpty()) return;
+        if (token == null || token.isEmpty())
+            return;
         verifyAndSignIn(token);
     }
 
@@ -128,16 +134,22 @@ public class SignUpActivity extends AppCompatActivity {
         body.put("token", token);
 
         api.verifyToken(body).enqueue(new Callback<VerifyResponse>() {
-            @Override public void onResponse(Call<VerifyResponse> call, Response<VerifyResponse> resp) {
+            @Override
+            public void onResponse(Call<VerifyResponse> call, Response<VerifyResponse> resp) {
                 VerifyResponse vr = resp.body();
-                if (!resp.isSuccessful() || vr == null || !vr.ok || vr.customToken == null || vr.customToken.isEmpty()) {
-                    toast("Verification failed."); return;
+                if (!resp.isSuccessful() || vr == null || !vr.ok || vr.customToken == null
+                        || vr.customToken.isEmpty()) {
+                    toast("Verification failed.");
+                    return;
                 }
 
                 auth.signInWithCustomToken(vr.customToken)
                         .addOnSuccessListener(cred -> {
                             FirebaseUser fu = cred.getUser();
-                            if (fu == null) { toast("Auth error."); return; }
+                            if (fu == null) {
+                                toast("Auth error.");
+                                return;
+                            }
 
                             Log.i(TAG, "Sign-in OK: " + fu.getUid());
                             ensureUserDocAndRoute(fu.getUid(), vr.email);
@@ -150,9 +162,8 @@ public class SignUpActivity extends AppCompatActivity {
                                             TokenRegistrar.ensureDevice(fcmToken, "client");
                                         }
                                     })
-                                    .addOnFailureListener(e ->
-                                            Log.w("FCM", "fresh sign-in getToken failed: " + e.getMessage())
-                                    );
+                                    .addOnFailureListener(
+                                            e -> Log.w("FCM", "fresh sign-in getToken failed: " + e.getMessage()));
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "signInWithCustomToken failed", e);
@@ -160,14 +171,16 @@ public class SignUpActivity extends AppCompatActivity {
                         });
             }
 
-            @Override public void onFailure(Call<VerifyResponse> call, Throwable t) {
+            @Override
+            public void onFailure(Call<VerifyResponse> call, Throwable t) {
                 toast("Network error: " + t.getMessage());
             }
         });
     }
 
     /**
-     * Ensure Firestore doc has your full model keys; then decide whether to open Profile tab.
+     * Ensure Firestore doc has your full model keys; then decide whether to open
+     * Profile tab.
      * We DO NOT overwrite points/visits; we just ensure keys/timestamps exist.
      */
     private void ensureUserDocAndRoute(@NonNull String uid, String emailFromVerify) {
@@ -179,9 +192,9 @@ public class SignUpActivity extends AppCompatActivity {
 
             String fullName = exists ? doc.getString("fullName") : null;
             String birthday = exists ? doc.getString("birthday") : null;
-            String gender   = exists ? doc.getString("gender") : null;
-            Number pointsN  = exists ? doc.getLong("points") : null;
-            Number visitsN  = exists ? doc.getLong("visits") : null;
+            String gender = exists ? doc.getString("gender") : null;
+            Number pointsN = exists ? doc.getLong("points") : null;
+            Number visitsN = exists ? doc.getLong("visits") : null;
             Boolean verifiedB = exists ? doc.getBoolean("isVerified") : null;
             String emailInDoc = exists ? doc.getString("email") : null;
 
@@ -206,11 +219,10 @@ public class SignUpActivity extends AppCompatActivity {
 
             userRef.set(up, SetOptions.merge())
                     .addOnSuccessListener(unused -> {
-                        boolean missingProfile =
-                                (fullName == null || fullName.trim().isEmpty()) ||
-                                        (birthday == null || birthday.trim().isEmpty()) ||
-                                        (gender == null || gender.trim().isEmpty()) ||
-                                        !isVerified;
+                        boolean missingProfile = (fullName == null || fullName.trim().isEmpty()) ||
+                                (birthday == null || birthday.trim().isEmpty()) ||
+                                (gender == null || gender.trim().isEmpty()) ||
+                                !isVerified;
                         goToMain(missingProfile);
                     })
                     .addOnFailureListener(e -> {
@@ -235,5 +247,7 @@ public class SignUpActivity extends AppCompatActivity {
         finish();
     }
 
-    private void toast(String s) { Toast.makeText(this, s, Toast.LENGTH_SHORT).show(); }
+    private void toast(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
 }

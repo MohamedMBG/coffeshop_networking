@@ -38,6 +38,8 @@ public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
 
+    private com.example.loyaltyapp.databinding.FragmentHomeBinding binding;
+
     // Menu UI
     private RecyclerView menuRv;
     private Chip chipAll, chipCoffee, chipTea, chipPastries, chipBreakfast, chipLunch;
@@ -57,7 +59,8 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        binding = com.example.loyaltyapp.databinding.FragmentHomeBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -68,21 +71,21 @@ public class HomeFragment extends Fragment {
         viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         // ---- Bind menu views
-        menuRv = v.findViewById(R.id.menuRecyclerView);
-        chipAll = v.findViewById(R.id.chipAll);
-        chipCoffee = v.findViewById(R.id.chipCoffee);
-        chipTea = v.findViewById(R.id.chipTea);
-        chipPastries = v.findViewById(R.id.chipPastries);
-        chipBreakfast = v.findViewById(R.id.chipBreakfast);
-        chipLunch = v.findViewById(R.id.chipLunch);
+        menuRv = binding.menuRecyclerView;
+        chipAll = binding.chipAll;
+        chipCoffee = binding.chipCoffee;
+        chipTea = binding.chipTea;
+        chipPastries = binding.chipPastries;
+        chipBreakfast = binding.chipBreakfast;
+        chipLunch = binding.chipLunch;
 
         // ---- Bind banner views
-        bannerCard = v.findViewById(R.id.bannerCard);
-        bannerRoot = v.findViewById(R.id.bannerRoot);
-        tvBannerBadge = v.findViewById(R.id.tvBannerBadge);
-        tvBannerTitle = v.findViewById(R.id.tvBannerTitle);
-        tvBannerSubtitle = v.findViewById(R.id.tvBannerSubtitle);
-        ivBannerIcon = v.findViewById(R.id.ivBannerIcon);
+        bannerCard = binding.bannerCard;
+        bannerRoot = binding.bannerRoot;
+        tvBannerBadge = binding.tvBannerBadge;
+        tvBannerTitle = binding.tvBannerTitle;
+        tvBannerSubtitle = binding.tvBannerSubtitle;
+        ivBannerIcon = binding.ivBannerIcon;
 
         // ---- RecyclerView
         menuRv.setLayoutManager(new GridLayoutManager(requireContext(), 2));
@@ -222,5 +225,11 @@ public class HomeFragment extends Fragment {
 
     private float dp(int dps) {
         return dps * getResources().getDisplayMetrics().density;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

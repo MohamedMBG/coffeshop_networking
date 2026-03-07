@@ -48,14 +48,16 @@ public class RewarsdFragment extends Fragment {
 
     // Firestore fields
     private static final String COL_REWARDS = "Rewards";
-    private static final String COL_USERS   = "users";
-    private static final String F_ACTIVE    = "active";
-    private static final String F_CATEGORY  = "category";
-    private static final String F_NAME      = "name";
-    private static final String F_IMAGE     = "imagePath";
-    private static final String F_PRICE     = "priceMAD";
-    private static final String F_POINTS    = "redeemPoints";
-    private static final String F_USERPTS   = "points";
+    private static final String COL_USERS = "users";
+    private static final String F_ACTIVE = "active";
+    private static final String F_CATEGORY = "category";
+    private static final String F_NAME = "name";
+    private static final String F_IMAGE = "imagePath";
+    private static final String F_PRICE = "priceMAD";
+    private static final String F_POINTS = "redeemPoints";
+    private static final String F_USERPTS = "points";
+
+    private com.example.loyaltyapp.databinding.FragmentRewarsdBinding binding;
 
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recycler;
@@ -66,34 +68,40 @@ public class RewarsdFragment extends Fragment {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final String uid = FirebaseAuth.getInstance().getCurrentUser() != null
-            ? FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+            ? FirebaseAuth.getInstance().getCurrentUser().getUid()
+            : null;
 
     private RewardAdapter adapter;
     private int userPoints = 0;
     private String activeFilter = "all"; // all|Food|Drinks|Exclusive (match your data case)
 
-    public RewarsdFragment() {}
+    public RewarsdFragment() {
+    }
 
-    @Nullable @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_rewarsd, container, false);
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        binding = com.example.loyaltyapp.databinding.FragmentRewarsdBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        swipeRefresh      = v.findViewById(R.id.swipeRefresh);
-        recycler          = v.findViewById(R.id.rewardsRecycler);
-        emptyState        = v.findViewById(R.id.emptyState);
-        loadingOverlay = v.findViewById(R.id.loadingOverlay); // ✅ correct
-        tvPointsHeader    = v.findViewById(R.id.tvPointsHeader);
-        tvNextRewardInfo  = v.findViewById(R.id.tvNextRewardInfo);
-        progressToNext    = v.findViewById(R.id.progressToNext);
-        chipGroup         = v.findViewById(R.id.chipGroupFilters);
+        swipeRefresh = binding.swipeRefresh;
+        recycler = binding.rewardsRecycler;
+        emptyState = binding.emptyState;
+        loadingOverlay = binding.loadingOverlay;
+        tvPointsHeader = binding.tvPointsHeader;
+        tvNextRewardInfo = binding.tvNextRewardInfo;
+        progressToNext = binding.progressToNext;
+        chipGroup = binding.chipGroupFilters;
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
-        recycler.setNestedScrollingEnabled(false);;
+        recycler.setNestedScrollingEnabled(false);
+        ;
         adapter = new RewardAdapter(() -> userPoints, this::onRedeemClicked);
         recycler.setAdapter(adapter);
 
@@ -104,10 +112,14 @@ public class RewarsdFragment extends Fragment {
                 activeFilter = "all";
             } else {
                 int id = ids.get(0);
-                if (id == R.id.chipFood) activeFilter = "Food";
-                else if (id == R.id.chipDrinks) activeFilter = "Drinks";
-                else if (id == R.id.chipExclusive) activeFilter = "Exclusive";
-                else activeFilter = "all";
+                if (id == R.id.chipFood)
+                    activeFilter = "Food";
+                else if (id == R.id.chipDrinks)
+                    activeFilter = "Drinks";
+                else if (id == R.id.chipExclusive)
+                    activeFilter = "Exclusive";
+                else
+                    activeFilter = "all";
             }
             loadRewards();
         });
@@ -121,7 +133,12 @@ public class RewarsdFragment extends Fragment {
     }
 
     private void loadUserPoints(@NonNull Runnable then) {
-        if (uid == null) { userPoints = 0; updateHeader(0); then.run(); return; }
+        if (uid == null) {
+            userPoints = 0;
+            updateHeader(0);
+            then.run();
+            return;
+        }
 
         db.collection(COL_USERS).document(uid).get()
                 .addOnSuccessListener(doc -> {
@@ -149,7 +166,8 @@ public class RewarsdFragment extends Fragment {
         if (!"all".equalsIgnoreCase(activeFilter)) {
             q = q.whereEqualTo(F_CATEGORY, activeFilter);
         }
-        if (withOrder) q = q.orderBy(F_POINTS, Direction.ASCENDING);
+        if (withOrder)
+            q = q.orderBy(F_POINTS, Direction.ASCENDING);
         return q;
     }
 
@@ -162,12 +180,13 @@ public class RewarsdFragment extends Fragment {
                     // If Firestore requires a composite index, fall back to fetching
                     // without order and sort on-device to keep UI working.
                     if (err instanceof FirebaseFirestoreException &&
-                            ((FirebaseFirestoreException) err).getCode() == FirebaseFirestoreException.Code.FAILED_PRECONDITION) {
+                            ((FirebaseFirestoreException) err)
+                                    .getCode() == FirebaseFirestoreException.Code.FAILED_PRECONDITION) {
 
                         Log.w(TAG, "Composite index missing. Falling back to client-side sort.", err);
                         buildQuery(false)
                                 .get(com.google.firebase.firestore.Source.SERVER)
-                                .addOnSuccessListener(snap -> applyRewardsFromSnapshot(snap, /*sortOnDevice=*/true))
+                                .addOnSuccessListener(snap -> applyRewardsFromSnapshot(snap, /* sortOnDevice= */true))
                                 .addOnFailureListener(this::showLoadError);
                     } else {
                         showLoadError(err);
@@ -176,7 +195,7 @@ public class RewarsdFragment extends Fragment {
     }
 
     private void applyRewardsFromSnapshot(@NonNull QuerySnapshot snap) {
-        applyRewardsFromSnapshot(snap, /*sortOnDevice=*/false);
+        applyRewardsFromSnapshot(snap, /* sortOnDevice= */false);
     }
 
     private void applyRewardsFromSnapshot(@NonNull QuerySnapshot snap, boolean sortOnDevice) {
@@ -185,7 +204,8 @@ public class RewarsdFragment extends Fragment {
 
         for (DocumentSnapshot d : snap.getDocuments()) {
             Rewards r = parseReward(d);
-            if (r == null) continue;
+            if (r == null)
+                continue;
             list.add(r);
         }
 
@@ -196,7 +216,8 @@ public class RewarsdFragment extends Fragment {
         if (!list.isEmpty()) {
             cheapest = list.get(0).redeemPoints;
             for (int i = 1; i < list.size(); i++) {
-                if (list.get(i).redeemPoints < cheapest) cheapest = list.get(i).redeemPoints;
+                if (list.get(i).redeemPoints < cheapest)
+                    cheapest = list.get(i).redeemPoints;
             }
         }
 
@@ -220,7 +241,8 @@ public class RewarsdFragment extends Fragment {
     private Rewards parseReward(@NonNull DocumentSnapshot d) {
         Boolean active = d.getBoolean(F_ACTIVE);
         String name = d.getString(F_NAME);
-        if (active == null || !active || name == null) return null;
+        if (active == null || !active || name == null)
+            return null;
 
         Rewards r = new Rewards();
         r.id = d.getId();
@@ -230,15 +252,21 @@ public class RewarsdFragment extends Fragment {
 
         // priceMAD can be Double or Long
         Object price = d.get(F_PRICE);
-        if (price instanceof Double) r.priceMAD = (Double) price;
-        else if (price instanceof Long) r.priceMAD = ((Long) price).doubleValue();
-        else r.priceMAD = 0d;
+        if (price instanceof Double)
+            r.priceMAD = (Double) price;
+        else if (price instanceof Long)
+            r.priceMAD = ((Long) price).doubleValue();
+        else
+            r.priceMAD = 0d;
 
         // redeemPoints can be Long or Double
         Object pts = d.get(F_POINTS);
-        if (pts instanceof Long) r.redeemPoints = ((Long) pts).intValue();
-        else if (pts instanceof Double) r.redeemPoints = ((Double) pts).intValue();
-        else r.redeemPoints = 0;
+        if (pts instanceof Long)
+            r.redeemPoints = ((Long) pts).intValue();
+        else if (pts instanceof Double)
+            r.redeemPoints = ((Double) pts).intValue();
+        else
+            r.redeemPoints = 0;
 
         // optional category if your adapter needs it
         r.category = safeString(d.getString(F_CATEGORY));
@@ -246,7 +274,7 @@ public class RewarsdFragment extends Fragment {
         return r;
     }
 
-    //redeeming reward
+    // redeeming reward
     private void redeemReward(@NonNull final Rewards r) {
         if (uid == null) {
             Toast.makeText(requireContext(), "Not signed in", Toast.LENGTH_SHORT).show();
@@ -256,14 +284,14 @@ public class RewarsdFragment extends Fragment {
         showLoading(true);
 
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        final DocumentReference userRef   = db.collection(COL_USERS).document(uid);
+        final DocumentReference userRef = db.collection(COL_USERS).document(uid);
         final DocumentReference rewardRef = db.collection(COL_REWARDS).document(r.id);
 
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
             public Void apply(@NonNull Transaction tx) throws FirebaseFirestoreException {
                 // 1) Read both docs
-                DocumentSnapshot userSnap   = tx.get(userRef);
+                DocumentSnapshot userSnap = tx.get(userRef);
                 DocumentSnapshot rewardSnap = tx.get(rewardRef);
 
                 if (!userSnap.exists()) {
@@ -309,7 +337,6 @@ public class RewarsdFragment extends Fragment {
                 log.put("ts", Timestamp.now());
                 tx.set(logRef, log);
 
-
                 return null;
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -317,7 +344,8 @@ public class RewarsdFragment extends Fragment {
             public void onSuccess(Void unused) {
                 // Update local UI cache
                 userPoints -= r.redeemPoints;
-                if (userPoints < 0) userPoints = 0;
+                if (userPoints < 0)
+                    userPoints = 0;
                 updateHeader(userPoints);
                 showLoading(false);
                 Toast.makeText(requireContext(), "Redeemed: " + r.name, Toast.LENGTH_SHORT).show();
@@ -332,8 +360,9 @@ public class RewarsdFragment extends Fragment {
         });
     }
 
-
-    private static String safeString(String s) { return (s == null) ? "" : s; }
+    private static String safeString(String s) {
+        return (s == null) ? "" : s;
+    }
 
     private void onRedeemClicked(@NonNull Rewards r) {
         if (userPoints < r.redeemPoints) {
@@ -341,9 +370,11 @@ public class RewarsdFragment extends Fragment {
             return;
         }
         // TODO: call your redeem endpoint / Cloud Function here.
-        Snackbar.make(requireView(), "Redeem " + r.name + " for " + r.redeemPoints + " points: bientôt!", Snackbar.LENGTH_LONG)
+        Snackbar.make(requireView(), "Redeem " + r.name + " for " + r.redeemPoints + " points: bientôt!",
+                Snackbar.LENGTH_LONG)
                 .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
-                .setAction("OK", v -> {})
+                .setAction("OK", v -> {
+                })
                 .show();
         redeemReward(r);
     }
@@ -368,5 +399,11 @@ public class RewarsdFragment extends Fragment {
     private void showLoading(boolean show) {
         swipeRefresh.setRefreshing(false);
         loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

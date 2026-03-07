@@ -28,6 +28,8 @@ import java.util.*;
 
 public class ActivityFragment extends Fragment {
 
+    private com.example.loyaltyapp.databinding.FragmentActivityBinding binding;
+
     // UI
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recycler;
@@ -47,7 +49,7 @@ public class ActivityFragment extends Fragment {
     private ActivityAdapter adapter;
 
     // Filters
-    private String typeFilter = "all";   // all|scan|redemption|bonus
+    private String typeFilter = "all"; // all|scan|redemption|bonus
     private Date fromDate = null, toDate = null; // inclusive ranges for custom/week/month
 
     // Firebase
@@ -57,34 +59,35 @@ public class ActivityFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_activity, container, false);
+            @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        binding = com.example.loyaltyapp.databinding.FragmentActivityBinding.inflate(inflater, container, false);
+        View v = binding.getRoot();
 
         // Header
-        tvCurrentPoints = v.findViewById(R.id.tvCurrentPoints);
-        tvTotalVisits   = v.findViewById(R.id.tvTotalVisits);
-        tvLastScan      = v.findViewById(R.id.tvLastScan);
-        tvUserLevel     = v.findViewById(R.id.tvUserLevel);
-        btnInfo         = v.findViewById(R.id.btnInfo);
+        tvCurrentPoints = binding.tvCurrentPoints;
+        tvTotalVisits = binding.tvTotalVisits;
+        tvLastScan = binding.tvLastScan;
+        tvUserLevel = binding.tvUserLevel;
+        btnInfo = binding.btnInfo;
 
         // List/empty/loading
-        swipeRefresh = v.findViewById(R.id.swipeRefresh);
-        recycler     = v.findViewById(R.id.activityRecyclerView);
-        emptyState   = v.findViewById(R.id.emptyState);
-        loading      = v.findViewById(R.id.loadingIndicator);
-        btnScanNow   = v.findViewById(R.id.btnScanNow);
+        swipeRefresh = binding.swipeRefresh;
+        recycler = binding.activityRecyclerView;
+        emptyState = binding.emptyState;
+        loading = binding.loadingIndicator;
+        btnScanNow = binding.btnScanNow;
 
         // Chips
-        chipGroupType   = v.findViewById(R.id.chipGroupType);
-        chipGroupDate   = v.findViewById(R.id.chipGroupDate);
-        chipAll         = v.findViewById(R.id.chipAll);
-        chipScans       = v.findViewById(R.id.chipScans);
-        chipRedemptions = v.findViewById(R.id.chipRedemptions);
-        chipBonuses     = v.findViewById(R.id.chipBonuses);
-        chipThisWeek    = v.findViewById(R.id.chipThisWeek);
-        chipThisMonth   = v.findViewById(R.id.chipThisMonth);
-        chipCustomDate  = v.findViewById(R.id.chipCustomDate);
+        chipGroupType = binding.chipGroupType;
+        chipGroupDate = binding.chipGroupDate;
+        chipAll = binding.chipAll;
+        chipScans = binding.chipScans;
+        chipRedemptions = binding.chipRedemptions;
+        chipBonuses = binding.chipBonuses;
+        chipThisWeek = binding.chipThisWeek;
+        chipThisMonth = binding.chipThisMonth;
+        chipCustomDate = binding.chipCustomDate;
 
         // Recycler
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -96,12 +99,17 @@ public class ActivityFragment extends Fragment {
 
         // Chip listeners
         chipGroupType.setOnCheckedStateChangeListener((group, ids) -> {
-            if (ids.isEmpty()) return; // selectionRequired=true in XML, but just in case
+            if (ids.isEmpty())
+                return; // selectionRequired=true in XML, but just in case
             int id = ids.get(0);
-            if (id == chipAll.getId()) typeFilter = "all";
-            else if (id == chipScans.getId()) typeFilter = "scan";
-            else if (id == chipRedemptions.getId()) typeFilter = "redemption";
-            else if (id == chipBonuses.getId()) typeFilter = "bonus";
+            if (id == chipAll.getId())
+                typeFilter = "all";
+            else if (id == chipScans.getId())
+                typeFilter = "scan";
+            else if (id == chipRedemptions.getId())
+                typeFilter = "redemption";
+            else if (id == chipBonuses.getId())
+                typeFilter = "bonus";
             applyFilters();
         });
 
@@ -123,9 +131,8 @@ public class ActivityFragment extends Fragment {
         });
 
         // Info click: tiny toast/help
-        btnInfo.setOnClickListener(vw ->
-                Toast.makeText(requireContext(), "Earn points by scanning in-store. Redeem rewards from your points.", Toast.LENGTH_SHORT).show()
-        );
+        btnInfo.setOnClickListener(vw -> Toast.makeText(requireContext(),
+                "Earn points by scanning in-store. Redeem rewards from your points.", Toast.LENGTH_SHORT).show());
 
         // Scan now → switch to Scan tab
         btnScanNow.setOnClickListener(vw -> {
@@ -177,7 +184,8 @@ public class ActivityFragment extends Fragment {
                         ActivityEvent ev = ActivityEvent.fromDoc(d);
                         if (ev != null) {
                             allEvents.add(ev);
-                            if (lastTs == null) lastTs = ev.ts;
+                            if (lastTs == null)
+                                lastTs = ev.ts;
                         }
                     }
                     // Last scan text
@@ -192,7 +200,8 @@ public class ActivityFragment extends Fragment {
                 })
                 .addOnFailureListener(e -> {
                     stopLoading();
-                    Toast.makeText(requireContext(), "Failed to load activity: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Failed to load activity: " + e.getMessage(), Toast.LENGTH_SHORT)
+                            .show();
                 });
     }
 
@@ -200,8 +209,10 @@ public class ActivityFragment extends Fragment {
     private void applyFilters() {
         shownEvents.clear();
         for (ActivityEvent ev : allEvents) {
-            if (!typePass(ev)) continue;
-            if (!datePass(ev)) continue;
+            if (!typePass(ev))
+                continue;
+            if (!datePass(ev))
+                continue;
             shownEvents.add(ev);
         }
         adapter.notifyDataSetChanged();
@@ -209,22 +220,30 @@ public class ActivityFragment extends Fragment {
     }
 
     private boolean typePass(ActivityEvent ev) {
-        if ("all".equals(typeFilter)) return true;
+        if ("all".equals(typeFilter))
+            return true;
         return typeFilter.equals(ev.type);
     }
 
     private boolean datePass(ActivityEvent ev) {
-        if (fromDate == null && toDate == null) return true;
+        if (fromDate == null && toDate == null)
+            return true;
         Date t = ev.ts != null ? ev.ts.toDate() : null;
-        if (t == null) return false;
-        if (fromDate != null && t.before(trimStart(fromDate))) return false;
-        if (toDate != null && t.after(trimEnd(toDate))) return false;
+        if (t == null)
+            return false;
+        if (fromDate != null && t.before(trimStart(fromDate)))
+            return false;
+        if (toDate != null && t.after(trimEnd(toDate)))
+            return false;
         return true;
     }
 
     private void setThisWeekRange() {
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
         fromDate = c.getTime();
         c.add(Calendar.DAY_OF_YEAR, 6);
@@ -233,7 +252,10 @@ public class ActivityFragment extends Fragment {
 
     private void setThisMonthRange() {
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.HOUR_OF_DAY, 0); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
         c.set(Calendar.DAY_OF_MONTH, 1);
         fromDate = c.getTime();
         c.add(Calendar.MONTH, 1);
@@ -242,16 +264,17 @@ public class ActivityFragment extends Fragment {
     }
 
     private void openCustomRangePicker() {
-        // simple two pickers (start then end); for production use a proper date-range picker
+        // simple two pickers (start then end); for production use a proper date-range
+        // picker
         final Calendar start = Calendar.getInstance();
-        final Calendar end   = Calendar.getInstance();
+        final Calendar end = Calendar.getInstance();
 
         DatePickerDialog dpStart = new DatePickerDialog(requireContext(), (v, y, m, d) -> {
             start.set(y, m, d, 0, 0, 0);
             DatePickerDialog dpEnd = new DatePickerDialog(requireContext(), (v2, y2, m2, d2) -> {
                 end.set(y2, m2, d2, 23, 59, 59);
                 fromDate = start.getTime();
-                toDate   = end.getTime();
+                toDate = end.getTime();
                 applyFilters();
             }, end.get(Calendar.YEAR), end.get(Calendar.MONTH), end.get(Calendar.DAY_OF_MONTH));
             dpEnd.show();
@@ -260,7 +283,8 @@ public class ActivityFragment extends Fragment {
     }
 
     private void startLoading(boolean first) {
-        if (first) loading.setVisibility(View.VISIBLE);
+        if (first)
+            loading.setVisibility(View.VISIBLE);
         swipeRefresh.setRefreshing(true);
         emptyState.setVisibility(View.GONE);
     }
@@ -275,31 +299,50 @@ public class ActivityFragment extends Fragment {
     }
 
     private static String levelFor(int points) {
-        if (points >= 200) return "Gold";
-        if (points >= 100) return "Silver";
+        if (points >= 200)
+            return "Gold";
+        if (points >= 100)
+            return "Silver";
         return "Bronze";
     }
 
     private static Date trimStart(Date d) {
-        Calendar c = Calendar.getInstance(); c.setTime(d);
-        c.set(Calendar.HOUR_OF_DAY, 0); c.set(Calendar.MINUTE, 0); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
         return c.getTime();
     }
 
     private static Date trimEnd(Date d) {
-        Calendar c = Calendar.getInstance(); c.setTime(d);
-        c.set(Calendar.HOUR_OF_DAY, 23); c.set(Calendar.MINUTE, 59); c.set(Calendar.SECOND, 59); c.set(Calendar.MILLISECOND, 999);
+        Calendar c = Calendar.getInstance();
+        c.setTime(d);
+        c.set(Calendar.HOUR_OF_DAY, 23);
+        c.set(Calendar.MINUTE, 59);
+        c.set(Calendar.SECOND, 59);
+        c.set(Calendar.MILLISECOND, 999);
         return c.getTime();
     }
 
     private static String relativeTime(Date date) {
         long diff = System.currentTimeMillis() - date.getTime();
         long mins = diff / 60000;
-        if (mins < 1) return "just now";
-        if (mins < 60) return mins + " min ago";
+        if (mins < 1)
+            return "just now";
+        if (mins < 60)
+            return mins + " min ago";
         long hrs = mins / 60;
-        if (hrs < 24) return hrs + " h ago";
+        if (hrs < 24)
+            return hrs + " h ago";
         long days = hrs / 24;
         return days + " days ago";
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

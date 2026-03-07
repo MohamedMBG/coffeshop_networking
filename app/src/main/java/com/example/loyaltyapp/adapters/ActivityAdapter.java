@@ -23,10 +23,12 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
         this.data = data;
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_activity, parent, false);
-        return new VH(v);
+        com.example.loyaltyapp.databinding.ItemActivityBinding binding = com.example.loyaltyapp.databinding.ItemActivityBinding
+                .inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new VH(binding);
     }
 
     @Override
@@ -87,23 +89,26 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
         }
     }
 
-
     @Override
-    public int getItemCount() { return data.size(); }
+    public int getItemCount() {
+        return data.size();
+    }
 
     static class VH extends RecyclerView.ViewHolder {
+        com.example.loyaltyapp.databinding.ItemActivityBinding binding;
         View iconBackground;
         ImageView activityIcon;
         TextView activityTitle, activityDateTime, activityDetails, activityPoints;
 
-        VH(@NonNull View v) {
-            super(v);
-            iconBackground   = v.findViewById(R.id.iconBackground);
-            activityIcon     = v.findViewById(R.id.activityIcon);
-            activityTitle    = v.findViewById(R.id.activityTitle);
-            activityDateTime = v.findViewById(R.id.activityDateTime);
-            activityDetails  = v.findViewById(R.id.activityDetails);
-            activityPoints   = v.findViewById(R.id.activityPoints);
+        VH(@NonNull com.example.loyaltyapp.databinding.ItemActivityBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            iconBackground = binding.iconBackground;
+            activityIcon = binding.activityIcon;
+            activityTitle = binding.activityTitle;
+            activityDateTime = binding.activityDateTime;
+            activityDetails = binding.activityDetails;
+            activityPoints = binding.activityPoints;
         }
     }
 }

@@ -37,6 +37,8 @@ import java.util.Locale;
 
 public class ProfileFragment extends Fragment {
 
+    private com.example.loyaltyapp.databinding.FragmentProfileBinding binding;
+
     // UI (affichage uniquement)
     private MaterialToolbar toolbar;
     private TextView tvName, tvEmail, tvPhone, tvBirthday, tvPoints, tvGender;
@@ -58,7 +60,8 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_profile, container, false);
+        binding = com.example.loyaltyapp.databinding.FragmentProfileBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -78,30 +81,30 @@ public class ProfileFragment extends Fragment {
         }
 
         // Bind vues
-        toolbar = v.findViewById(R.id.toolbar);
-        tvName = v.findViewById(R.id.tvName);
-        tvEmail = v.findViewById(R.id.tvEmail);
-        tvPhone = v.findViewById(R.id.tvPhone);
-        tvBirthday = v.findViewById(R.id.tvBirthday);
-        tvPoints = v.findViewById(R.id.tvPoints);
-        tvGender = v.findViewById(R.id.tvGender);
+        toolbar = binding.toolbar;
+        tvName = binding.tvName;
+        tvEmail = binding.tvEmail;
+        tvPhone = binding.tvPhone;
+        tvBirthday = binding.tvBirthday;
+        tvPoints = binding.tvPoints;
+        tvGender = binding.tvGender;
 
-        editCard = v.findViewById(R.id.edit2);
-        inputFullName = v.findViewById(R.id.inputFullName);
-        inputBirthday = v.findViewById(R.id.inputBirthday);
-        inputPhone = v.findViewById(R.id.inputPhone);
-        inputAddress = v.findViewById(R.id.inputAddress);
-        radioMale = v.findViewById(R.id.radioMale);
-        radioFemale = v.findViewById(R.id.radioFemale);
-        genderGroup = v.findViewById(R.id.genderGroup);
-        btnSave = v.findViewById(R.id.btnSaveProfile);
+        editCard = binding.edit2;
+        inputFullName = binding.inputFullName;
+        inputBirthday = binding.inputBirthday;
+        inputPhone = binding.inputPhone;
+        inputAddress = binding.inputAddress;
+        radioMale = binding.radioMale;
+        radioFemale = binding.radioFemale;
+        genderGroup = binding.genderGroup;
+        btnSave = binding.btnSaveProfile;
 
-        layoutNotifications = v.findViewById(R.id.layoutNotifications);
-        layoutSavedRewards = v.findViewById(R.id.layoutSavedRewards);
-        layoutHelp = v.findViewById(R.id.layoutHelp);
-        layoutTerms = v.findViewById(R.id.layoutTerms);
-        layoutPrivacy = v.findViewById(R.id.layoutPrivacy);
-        logoutLayout = v.findViewById(R.id.layoutSignOut);
+        layoutNotifications = binding.layoutNotifications;
+        layoutSavedRewards = binding.layoutSavedRewards;
+        layoutHelp = binding.layoutHelp;
+        layoutTerms = binding.layoutTerms;
+        layoutPrivacy = binding.layoutPrivacy;
+        logoutLayout = binding.layoutSignOut;
 
         // UI Basic Setup
         tvEmail.setText(user.getEmail() != null ? user.getEmail() : getString(R.string.profile_email_placeholder));
@@ -241,5 +244,11 @@ public class ProfileFragment extends Fragment {
             auth.signOut();
         startActivity(new Intent(requireContext(), SignUpActivity.class));
         requireActivity().finish();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

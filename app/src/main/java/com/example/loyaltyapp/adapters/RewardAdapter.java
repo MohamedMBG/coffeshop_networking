@@ -31,12 +31,16 @@ public class RewardAdapter extends ListAdapter<Rewards, RewardAdapter.VH> {
         this.onRedeem = onRedeem;
     }
 
-    @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup p, int vType) {
-        View v = LayoutInflater.from(p.getContext()).inflate(R.layout.item_reward, p, false);
-        return new VH(v);
+    @NonNull
+    @Override
+    public VH onCreateViewHolder(@NonNull ViewGroup p, int vType) {
+        com.example.loyaltyapp.databinding.ItemRewardBinding binding = com.example.loyaltyapp.databinding.ItemRewardBinding
+                .inflate(LayoutInflater.from(p.getContext()), p, false);
+        return new VH(binding);
     }
 
-    @Override public void onBindViewHolder(@NonNull VH h, int pos) {
+    @Override
+    public void onBindViewHolder(@NonNull VH h, int pos) {
         Rewards r = getItem(pos);
         int userPts = pointsSupplier.getAsInt();
 
@@ -57,29 +61,40 @@ public class RewardAdapter extends ListAdapter<Rewards, RewardAdapter.VH> {
     }
 
     static final DiffUtil.ItemCallback<Rewards> DIFF = new DiffUtil.ItemCallback<Rewards>() {
-        @Override public boolean areItemsTheSame(@NonNull Rewards a, @NonNull Rewards b) { return equal(a.id, b.id); }
-        @Override public boolean areContentsTheSame(@NonNull Rewards a, @NonNull Rewards b) {
+        @Override
+        public boolean areItemsTheSame(@NonNull Rewards a, @NonNull Rewards b) {
+            return equal(a.id, b.id);
+        }
+
+        @Override
+        public boolean areContentsTheSame(@NonNull Rewards a, @NonNull Rewards b) {
             return a.active == b.active
                     && a.redeemPoints == b.redeemPoints
                     && equal(a.name, b.name)
                     && equal(a.imagePath, b.imagePath)
                     && a.priceMAD == b.priceMAD;
         }
-        private boolean equal(Object x, Object y) { return x == y || (x != null && x.equals(y)); }
+
+        private boolean equal(Object x, Object y) {
+            return x == y || (x != null && x.equals(y));
+        }
     };
 
     static class VH extends RecyclerView.ViewHolder {
+        com.example.loyaltyapp.databinding.ItemRewardBinding binding;
         ShapeableImageView imgThumb;
         TextView tvTitle, tvDesc, tvPrice, tvCost;
         MaterialButton btnRedeem;
-        VH(@NonNull View v) {
-            super(v);
-            imgThumb = v.findViewById(R.id.imgThumb);
-            tvTitle = v.findViewById(R.id.tvTitle);
-            tvDesc = v.findViewById(R.id.tvDesc);
-            tvPrice = v.findViewById(R.id.tvPrice);
-            tvCost = v.findViewById(R.id.tvCost);
-            btnRedeem = v.findViewById(R.id.btnRedeem);
+
+        VH(@NonNull com.example.loyaltyapp.databinding.ItemRewardBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            imgThumb = binding.imgThumb;
+            tvTitle = binding.tvTitle;
+            tvDesc = binding.tvDesc;
+            tvPrice = binding.tvPrice;
+            tvCost = binding.tvCost;
+            btnRedeem = binding.btnRedeem;
         }
     }
 }

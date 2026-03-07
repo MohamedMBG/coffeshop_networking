@@ -17,7 +17,9 @@ import java.util.List;
 
 public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.VH> {
 
-    public interface OnItemClick { void onClick(MenuItemModel item); }
+    public interface OnItemClick {
+        void onClick(MenuItemModel item);
+    }
 
     private List<MenuItemModel> data;
     private final OnItemClick onItemClick;
@@ -32,11 +34,12 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.VH> {
         notifyDataSetChanged();
     }
 
-    @NonNull @Override
+    @NonNull
+    @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.menu_item, parent, false);
-        return new VH(v);
+        com.example.loyaltyapp.databinding.MenuItemBinding binding = com.example.loyaltyapp.databinding.MenuItemBinding
+                .inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new VH(binding);
     }
 
     @Override
@@ -50,20 +53,27 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.VH> {
                 .into(h.image);
 
         h.itemView.setOnClickListener(v -> {
-            if (onItemClick != null) onItemClick.onClick(m);
+            if (onItemClick != null)
+                onItemClick.onClick(m);
         });
     }
 
-    @Override public int getItemCount() { return data == null ? 0 : data.size(); }
+    @Override
+    public int getItemCount() {
+        return data == null ? 0 : data.size();
+    }
 
     static class VH extends RecyclerView.ViewHolder {
+        com.example.loyaltyapp.databinding.MenuItemBinding binding;
         ImageView image;
         TextView title, price;
-        VH(@NonNull View v) {
-            super(v);
-            image = v.findViewById(R.id.itemImage);
-            title = v.findViewById(R.id.itemTitle);
-            price = v.findViewById(R.id.itemPrice);
+
+        VH(@NonNull com.example.loyaltyapp.databinding.MenuItemBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+            image = binding.itemImage;
+            title = binding.itemTitle;
+            price = binding.itemPrice;
         }
     }
 }

@@ -35,6 +35,7 @@ public class LoyaltyActivity extends AppCompatActivity {
 
     private static final String KEY_SELECTED = "selected_menu";
 
+    private com.example.loyaltyapp.databinding.ActivityLoyaltyBinding binding;
     private ListenerRegistration gateListener;
     private BottomNavigationView bottomNav;
 
@@ -51,7 +52,8 @@ public class LoyaltyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_loyalty); // must have nav_host_fragment & bottom_navigation
+        binding = com.example.loyaltyapp.databinding.ActivityLoyaltyBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
             if (checkSelfPermission(
@@ -76,7 +78,7 @@ public class LoyaltyActivity extends AppCompatActivity {
         }
         uid = user.getUid();
 
-        bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav = binding.bottomNavigation;
         bottomNav.setItemActiveIndicatorColor(null);
 
         // ou pour mettre une couleur transparente :
