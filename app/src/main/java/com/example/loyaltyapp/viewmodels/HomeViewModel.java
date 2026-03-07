@@ -8,6 +8,11 @@ import com.example.loyaltyapp.data.repository.ConfigRepository;
 import com.example.loyaltyapp.data.repository.MenuRepository;
 import com.example.loyaltyapp.models.MenuItemModel;
 
+import com.example.loyaltyapp.data.repository.UserRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,19 +20,27 @@ public class HomeViewModel extends ViewModel {
 
     private final MenuRepository menuRepo;
     private final ConfigRepository configRepo;
+    private final UserRepository userRepo;
 
     // Use LiveData to notify the Fragment
     private final MutableLiveData<List<MenuItemModel>> menuList = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Object>> bannerConfig = new MutableLiveData<>();
+    private final MutableLiveData<DocumentSnapshot> userData = new MutableLiveData<>();
 
     public HomeViewModel() {
         // Initialize Respositories
         menuRepo = new MenuRepository();
         configRepo = new ConfigRepository();
+        userRepo = new UserRepository();
 
         // Load default lists
         loadPopularItems();
         configRepo.listenToBannerConfig(bannerConfig);
+
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        if (u != null) {
+            userRepo.listenToUser(u.getUid(), userData);
+        }
     }
 
     public LiveData<List<MenuItemModel>> getMenuData() {
@@ -36,6 +49,10 @@ public class HomeViewModel extends ViewModel {
 
     public LiveData<Map<String, Object>> getBannerConfigData() {
         return bannerConfig;
+    }
+
+    public LiveData<DocumentSnapshot> getUserData() {
+        return userData;
     }
 
     // Interaction triggers
@@ -56,6 +73,7 @@ public class HomeViewModel extends ViewModel {
         // Ensure no memory leaks with Firestore connections
         menuRepo.cleanup();
         configRepo.cleanup();
+        userRepo.cleanup();
         super.onCleared();
     }
 }

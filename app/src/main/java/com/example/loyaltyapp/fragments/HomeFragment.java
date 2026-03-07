@@ -113,6 +113,45 @@ public class HomeFragment extends Fragment {
         });
 
         viewModel.getBannerConfigData().observe(getViewLifecycleOwner(), this::bindBanner);
+
+        // ---- Punch Card gamification binding
+        viewModel.getUserData().observe(getViewLifecycleOwner(), doc -> {
+            if (doc != null && doc.exists()) {
+                Long vObj = doc.getLong("visits");
+                int visits = vObj != null ? vObj.intValue() : 0;
+                updatePunchCard(visits);
+            }
+        });
+    }
+
+    private void updatePunchCard(int visits) {
+        int cupsFilled = visits % 10;
+
+        for (int i = 0; i < 10; i++) {
+            android.widget.ImageView cup = (android.widget.ImageView) binding.gridPunchCard.getChildAt(i);
+            if (cup == null)
+                continue;
+
+            if (i < cupsFilled) {
+                cup.setImageResource(R.drawable.ic_coffee_cup_filled);
+                // remove highlight background if any, mostly for cup 10 but harmless for others
+                cup.setBackground(null);
+            } else {
+                cup.setImageResource(R.drawable.ic_coffee_cup_empty);
+                if (i == 9) { // The reward cup
+                    cup.setBackgroundResource(R.drawable.circle_background_bonus);
+                } else {
+                    cup.setBackground(null);
+                }
+            }
+        }
+
+        if (cupsFilled == 0 && visits > 0) {
+            binding.tvPunchCardSubtitle.setText("You have a free coffee waiting!");
+        } else {
+            int needed = 10 - cupsFilled;
+            binding.tvPunchCardSubtitle.setText(needed + " more coffees until your next free one!");
+        }
     }
 
     // ===================== Banner (UI Binding logic) =====================

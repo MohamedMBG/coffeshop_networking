@@ -184,6 +184,65 @@
                 </RelativeLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- Punch Card Gamification -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/punchCardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="?attr/colorSurfaceVariant">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Loyalty Punch Card"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="?android:attr/textColorPrimary"/>
+
+                    <TextView
+                        android:id="@+id/tvPunchCardSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Buy 9 coffees, get the 10th free!"
+                        android:textSize="14sp"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"/>
+
+                    <GridLayout
+                        android:id="@+id/gridPunchCard"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:columnCount="5"
+                        android:rowCount="2"
+                        android:alignmentMode="alignBounds"
+                        android:layout_gravity="center_horizontal"
+                        android:useDefaultMargins="true">
+
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp"/>
+                        <ImageView android:layout_width="36dp" android:layout_height="36dp" android:layout_gravity="center" android:src="@drawable/ic_coffee_cup_empty" android:layout_margin="8dp" android:background="@drawable/circle_background_bonus" android:padding="2dp"/>
+
+                    </GridLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
             <!-- Categories -->
             <TextView
                 android:layout_width="wrap_content"
