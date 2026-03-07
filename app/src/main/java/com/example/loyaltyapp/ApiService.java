@@ -1,4 +1,5 @@
 package com.example.loyaltyapp;
+
 // ApiService.java
 import java.util.Map;
 import retrofit2.Call;
@@ -11,6 +12,9 @@ public interface ApiService {
 
     @POST("api/verify")
     Call<VerifyResponse> verifyToken(@Body Map<String, String> body);
+
+    @POST("api/rewards/birthday")
+    Call<Map<String, Object>> claimBirthdayReward(@Body Map<String, String> body);
 
     // Plain POJO for /verify
     class VerifyResponse {

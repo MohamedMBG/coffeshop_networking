@@ -54,12 +54,11 @@ public class LoyaltyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_loyalty); // must have nav_host_fragment & bottom_navigation
 
         if (android.os.Build.VERSION.SDK_INT >= 33) {
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            if (checkSelfPermission(
+                    android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, 1001);
             }
         }
-
 
         checkBirthdayReward();
 
@@ -68,7 +67,7 @@ public class LoyaltyActivity extends AppCompatActivity {
         }
 
         auth = FirebaseAuth.getInstance();
-        db   = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             startActivity(new Intent(this, SignUpActivity.class));
@@ -81,7 +80,8 @@ public class LoyaltyActivity extends AppCompatActivity {
         bottomNav.setItemActiveIndicatorColor(null);
 
         // ou pour mettre une couleur transparente :
-        bottomNav.setItemActiveIndicatorColor(ColorStateList.valueOf(getResources().getColor(android.R.color.transparent, getTheme())));
+        bottomNav.setItemActiveIndicatorColor(
+                ColorStateList.valueOf(getResources().getColor(android.R.color.transparent, getTheme())));
         setupBottomNav();
 
         boolean requireProfileExtra = getIntent().getBooleanExtra("require_profile", false)
@@ -94,16 +94,20 @@ public class LoyaltyActivity extends AppCompatActivity {
             checkProfileCompletenessAndRoute();
         }
 
-        // Ensure there is an initial fragment visible (prevents empty screen if listener not fired yet)
+        // Ensure there is an initial fragment visible (prevents empty screen if
+        // listener not fired yet)
         if (getSupportFragmentManager().findFragmentByTag(String.valueOf(selectedItemId)) == null) {
             selectTabProgrammatically(selectedItemId);
         }
     }
-    @Override protected void onStart() {
+
+    @Override
+    protected void onStart() {
         super.onStart();
         gateListener = db.collection("meta").document("app_status")
                 .addSnapshotListener((doc, err) -> {
-                    if (err != null || doc == null) return;
+                    if (err != null || doc == null)
+                        return;
                     boolean active = Boolean.TRUE.equals(doc.getBoolean("isActive"));
                     if (!active) {
                         Intent i = new Intent(this, BlockedActivity.class);
@@ -114,7 +118,8 @@ public class LoyaltyActivity extends AppCompatActivity {
                 });
     }
 
-    @Override protected void onStop() {
+    @Override
+    protected void onStop() {
         super.onStop();
         if (gateListener != null) {
             gateListener.remove();
@@ -124,7 +129,8 @@ public class LoyaltyActivity extends AppCompatActivity {
 
     private void setupBottomNav() {
         bottomNav.setOnItemSelectedListener(item -> {
-            if (suppressNavCallback) return true;
+            if (suppressNavCallback)
+                return true;
 
             int id = item.getItemId();
             if (profileRequired && id != R.id.profileFragment) {
@@ -147,12 +153,14 @@ public class LoyaltyActivity extends AppCompatActivity {
     }
 
     private void switchTo(@IdRes int menuId) {
-        if (selectedItemId == menuId && fragments.containsKey(menuId)) return;
+        if (selectedItemId == menuId && fragments.containsKey(menuId))
+            return;
 
         FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
 
         Fragment current = fragments.get(selectedItemId);
-        if (current != null && current.isAdded()) tx.hide(current);
+        if (current != null && current.isAdded())
+            tx.hide(current);
 
         Fragment target = fragments.get(menuId);
         if (target == null) {
@@ -170,11 +178,16 @@ public class LoyaltyActivity extends AppCompatActivity {
     }
 
     private Fragment createFragmentFor(@IdRes int menuId) {
-        if (menuId == R.id.homeFragment)          return new HomeFragment();
-        if (menuId == R.id.navigation_activity)   return new ActivityFragment();
-        if (menuId == R.id.scanFragment)          return new ScanFragment();
-        if (menuId == R.id.profileFragment)       return new ProfileFragment();
-        if (menuId == R.id.rewardsFragment)       return new RewarsdFragment(); // ✅ correct
+        if (menuId == R.id.homeFragment)
+            return new HomeFragment();
+        if (menuId == R.id.navigation_activity)
+            return new ActivityFragment();
+        if (menuId == R.id.scanFragment)
+            return new ScanFragment();
+        if (menuId == R.id.profileFragment)
+            return new ProfileFragment();
+        if (menuId == R.id.rewardsFragment)
+            return new RewarsdFragment(); // ✅ correct
         return new HomeFragment();
     }
 
@@ -190,56 +203,32 @@ public class LoyaltyActivity extends AppCompatActivity {
 
     private void checkBirthdayReward() {
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
-        if (u == null) return;
+        if (u == null)
+            return;
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference userRef = db.collection("users").document(u.getUid());
+        Map<String, String> body = new HashMap<>();
+        body.put("uid", u.getUid());
 
-        userRef.get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) return;
-
-            String birthday = doc.getString("birthday");
-            if (birthday == null || birthday.isEmpty()) return;
-
-            // Parse user's birthday (expected format: yyyy-MM-dd)
-            String[] parts = birthday.split("-");
-            if (parts.length < 3) return;
-            int month = Integer.parseInt(parts[1]);
-            int day = Integer.parseInt(parts[2]);
-
-            // Today's date
-            java.util.Calendar c = java.util.Calendar.getInstance();
-            int todayMonth = c.get(java.util.Calendar.MONTH) + 1;
-            int todayDay = c.get(java.util.Calendar.DAY_OF_MONTH);
-
-            // If today == birthday
-            if (todayMonth == month && todayDay == day) {
-                String todayKey = String.format("%04d-%02d-%02d",
-                        c.get(java.util.Calendar.YEAR), todayMonth, todayDay);
-
-                // Prevent multiple rewards in the same day
-                String lastRewardDate = doc.getString("lastBirthdayReward");
-                if (todayKey.equals(lastRewardDate)) {
-                    return; // already rewarded today
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.claimBirthdayReward(body).enqueue(new retrofit2.Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(retrofit2.Call<Map<String, Object>> call,
+                    retrofit2.Response<Map<String, Object>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Boolean success = (Boolean) response.body().get("success");
+                    if (Boolean.TRUE.equals(success)) {
+                        Toast.makeText(LoyaltyActivity.this, "🎉 Happy Birthday! +15 points added!", Toast.LENGTH_LONG)
+                                .show();
+                    }
                 }
+            }
 
-                Long currentPoints = doc.getLong("points");
-                if (currentPoints == null) currentPoints = 0L;
-                long newPoints = currentPoints + 15L;
-
-                Map<String, Object> update = new HashMap<>();
-                update.put("points", newPoints);
-                update.put("lastBirthdayReward", todayKey);
-                update.put("updatedAt", FieldValue.serverTimestamp());
-
-                userRef.set(update, SetOptions.merge())
-                        .addOnSuccessListener(unused ->
-                                Toast.makeText(this, "🎉 Happy Birthday! +15 points added!", Toast.LENGTH_LONG).show()
-                        );
+            @Override
+            public void onFailure(retrofit2.Call<Map<String, Object>> call, Throwable t) {
+                // Silently ignore failures on startup
             }
         });
     }
-
 
     private void handleUserDoc(DocumentSnapshot doc) {
         boolean missing = true;
@@ -276,7 +265,8 @@ public class LoyaltyActivity extends AppCompatActivity {
     }
 
     public void openScanTab() {
-        if (!profileRequired) selectTabProgrammatically(R.id.scanFragment);
+        if (!profileRequired)
+            selectTabProgrammatically(R.id.scanFragment);
         else {
             Toast.makeText(this, "Please complete your profile first.", Toast.LENGTH_SHORT).show();
             selectTabProgrammatically(R.id.profileFragment);
@@ -289,6 +279,8 @@ public class LoyaltyActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-    public interface ScrollToTop { void scrollToTop(); }
+    public interface ScrollToTop {
+        void scrollToTop();
+    }
 
 }
