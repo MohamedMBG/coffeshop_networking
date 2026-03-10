@@ -5,14 +5,14 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.loyaltyapp.data.repository.UserRepository;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.loyaltyapp.models.User;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProfileViewModel extends ViewModel {
     private final UserRepository userRepository;
-    private final MutableLiveData<DocumentSnapshot> userData = new MutableLiveData<>();
+    private final MutableLiveData<User> userData = new MutableLiveData<>();
     private final MutableLiveData<SaveState> saveState = new MutableLiveData<>();
     private String currentUid;
 
@@ -27,7 +27,7 @@ public class ProfileViewModel extends ViewModel {
         }
     }
 
-    public LiveData<DocumentSnapshot> getUserData() {
+    public LiveData<User> getUserData() {
         return userData;
     }
 

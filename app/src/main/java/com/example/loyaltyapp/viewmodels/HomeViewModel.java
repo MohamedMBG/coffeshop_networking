@@ -9,9 +9,9 @@ import com.example.loyaltyapp.data.repository.MenuRepository;
 import com.example.loyaltyapp.models.MenuItemModel;
 
 import com.example.loyaltyapp.data.repository.UserRepository;
+import com.example.loyaltyapp.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class HomeViewModel extends ViewModel {
     // Use LiveData to notify the Fragment
     private final MutableLiveData<List<MenuItemModel>> menuList = new MutableLiveData<>();
     private final MutableLiveData<Map<String, Object>> bannerConfig = new MutableLiveData<>();
-    private final MutableLiveData<DocumentSnapshot> userData = new MutableLiveData<>();
+    private final MutableLiveData<User> userData = new MutableLiveData<>();
 
     public HomeViewModel() {
         // Initialize Respositories
@@ -51,7 +51,7 @@ public class HomeViewModel extends ViewModel {
         return bannerConfig;
     }
 
-    public LiveData<DocumentSnapshot> getUserData() {
+    public LiveData<User> getUserData() {
         return userData;
     }
 

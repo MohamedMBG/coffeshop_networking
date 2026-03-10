@@ -3,6 +3,9 @@ package com.example.loyaltyapp.data.repository;
 import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.loyaltyapp.models.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -16,7 +19,7 @@ public class UserRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ListenerRegistration userListener;
 
-    public void listenToUser(String uid, MutableLiveData<DocumentSnapshot> liveData) {
+    public void listenToUser(String uid, MutableLiveData<User> liveData) {
         if (userListener != null) {
             userListener.remove();
             userListener = null;
@@ -29,7 +32,16 @@ public class UserRepository {
                 return;
             }
             if (snapshot != null && snapshot.exists()) {
-                liveData.postValue(snapshot);
+                User user = snapshot.toObject(User.class);
+                if (user != null) {
+                    // uid might not be in the document itself, so set it manually just in case
+                    user.setUid(uid);
+                    liveData.postValue(user);
+                } else {
+                    liveData.postValue(null);
+                }
+            } else {
+                liveData.postValue(null);
             }
         });
     }

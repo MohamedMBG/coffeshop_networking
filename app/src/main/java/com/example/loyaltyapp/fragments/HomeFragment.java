@@ -23,7 +23,6 @@ import com.example.loyaltyapp.R;
 import com.example.loyaltyapp.models.MenuItemModel;
 import com.example.loyaltyapp.ui.MenuAdapter;
 import com.example.loyaltyapp.viewmodels.HomeViewModel;
-import com.google.android.material.chip.Chip;
 import com.google.firebase.Timestamp;
 
 import android.widget.ImageView;
@@ -115,11 +114,9 @@ public class HomeFragment extends Fragment {
         viewModel.getBannerConfigData().observe(getViewLifecycleOwner(), this::bindBanner);
 
         // ---- Punch Card gamification binding
-        viewModel.getUserData().observe(getViewLifecycleOwner(), doc -> {
-            if (doc != null && doc.exists()) {
-                Long vObj = doc.getLong("visits");
-                int visits = vObj != null ? vObj.intValue() : 0;
-                updatePunchCard(visits);
+        viewModel.getUserData().observe(getViewLifecycleOwner(), user -> {
+            if (user != null) {
+                updatePunchCard(user.getVisits());
             }
         });
     }
