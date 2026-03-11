@@ -10,6 +10,9 @@ public class User {
     private int visits;
     private boolean isVerified;
 
+    private String phone;
+    private String address;
+
     // Required empty constructor for Firestore
     public User() {}
 
@@ -23,6 +26,20 @@ public class User {
         this.points = points;
         this.visits = visits;
         this.isVerified = isVerified;
+    }
+
+    public User(String uid, String email, String fullName, String birthday, String gender,
+                int points, int visits, boolean isVerified, String phone, String address) {
+        this.uid = uid;
+        this.email = email;
+        this.fullName = fullName;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.points = points;
+        this.visits = visits;
+        this.isVerified = isVerified;
+        this.phone = phone;
+        this.address = address;
     }
 
     // Getters and setters
@@ -49,4 +66,10 @@ public class User {
 
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean verified) { isVerified = verified; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 }

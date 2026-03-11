@@ -10,6 +10,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
@@ -123,14 +127,14 @@ public class RewardsRepository {
         db.runTransaction(transaction -> {
             DocumentSnapshot userSnap = transaction.get(userRef);
             if (!userSnap.exists()) {
-                throw new Exception("User not found");
+                throw new FirebaseFirestoreException("User not found", FirebaseFirestoreException.Code.NOT_FOUND);
             }
 
             Long currentPointsLong = userSnap.getLong("points");
             int currentPoints = currentPointsLong != null ? currentPointsLong.intValue() : 0;
             
             if (currentPoints < reward.redeemPoints) {
-                throw new Exception("Insufficient points");
+                throw new FirebaseFirestoreException("Insufficient points", FirebaseFirestoreException.Code.ABORTED);
             }
 
             // Deduct points

@@ -27,6 +27,7 @@ import com.google.firebase.Timestamp;
 
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.google.android.material.chip.Chip;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -30,7 +30,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.example.loyaltyapp.models.User;
 
 import java.util.Calendar;
 import java.util.Locale;
@@ -129,11 +129,11 @@ public class ProfileFragment extends Fragment {
         viewModel.init(user.getUid());
 
         // Observer pattern for UI changes
-        viewModel.getUserData().observe(getViewLifecycleOwner(), documentSnap -> {
-            if (documentSnap == null) {
+        viewModel.getUserData().observe(getViewLifecycleOwner(), userObj -> {
+            if (userObj == null) {
                 Toast.makeText(requireContext(), "Failed to load profile.", Toast.LENGTH_SHORT).show();
             } else {
-                bindUser(documentSnap);
+                bindUser(userObj);
             }
         });
 
@@ -165,14 +165,14 @@ public class ProfileFragment extends Fragment {
                 .show();
     }
 
-    private void bindUser(@NonNull DocumentSnapshot doc) {
-        String fullName = doc.getString("fullName");
-        String birthday = doc.getString("birthday");
-        String gender = doc.getString("gender");
-        Long points = doc.getLong("points");
-        Boolean verified = doc.getBoolean("isVerified");
-        String phone = doc.getString("phone");
-        String address = doc.getString("address");
+    private void bindUser(@NonNull User user) {
+        String fullName = user.getFullName();
+        String birthday = user.getBirthday();
+        String gender = user.getGender();
+        Long points = (long) user.getPoints();
+        Boolean verified = user.isVerified();
+        String phone = user.getPhone();
+        String address = user.getAddress();
 
         tvName.setText(!TextUtils.isEmpty(fullName) ? fullName : getString(R.string.profile_name_placeholder));
         tvBirthday.setText(!TextUtils.isEmpty(birthday)

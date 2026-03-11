@@ -1,0 +1,49 @@
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac
+C:\Users\pc\AndroidStudioProjects\loyaltyapp\app\src\main\java\com\example\loyaltyapp\data\repository\RewardsRepository.java:130: error: unreported exception Exception; must be caught or declared to be thrown
+                throw new Exception("User not found");
+                ^
+C:\Users\pc\AndroidStudioProjects\loyaltyapp\app\src\main\java\com\example\loyaltyapp\data\repository\RewardsRepository.java:137: error: unreported exception Exception; must be caught or declared to be thrown
+                throw new Exception("Insufficient points");
+                ^
+C:\Users\pc\AndroidStudioProjects\loyaltyapp\app\src\main\java\com\example\loyaltyapp\fragments\ProfileFragment.java:136: error: incompatible types: User cannot be converted to DocumentSnapshot
+                bindUser(documentSnap);
+                         ^
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+3 errors
+
+> Task :app:compileDebugJavaWithJavac FAILED
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --info option to get more log output.
+> Run with --scan to get full insights.
+
+BUILD FAILED in 12s
+18 actionable tasks: 1 executed, 17 up-to-date

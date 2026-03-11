@@ -1,0 +1,85 @@
+﻿> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:dataBindingMergeDependencyArtifactsDebug UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:processDebugGoogleServices UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:dataBindingGenBaseClassesDebug UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+
+> Task :app:compileDebugJavaWithJavac
+./gradlew : C:\Users\pc\AndroidStudioP
+rojects\loyaltyapp\app\src\main\java\c
+om\example\loyaltyapp\data\repository\
+RewardsRepository.java:23: error: 
+cannot find symbol
+At line:1 char:1
++ ./gradlew compileDebugJavaWithJavac 
+> compile_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpec 
+   ified: (C:\Users\pc\And...not fin  
+  d symbol:String) [], RemoteExcept   
+ ion
+    + FullyQualifiedErrorId : NativeC 
+   ommandError
+ 
+    private final FirebaseFirestore 
+db = FirebaseFirestore.getInstance();
+                  ^
+  symbol:   class FirebaseFirestore
+  location: class RewardsRepository
+C:\Users\pc\AndroidStudioProjects\loya
+ltyapp\app\src\main\java\com\example\l
+oyaltyapp\data\repository\RewardsRepos
+itory.java:81: error: cannot find 
+symbol
+    private List<Rewards> 
+parseSnap(QuerySnapshot snap, boolean 
+sortOnDevice) {
+                                    ^
+  symbol:   class QuerySnapshot
+  location: class RewardsRepository
+C:\Users\pc\AndroidStudioProjects\loya
+ltyapp\app\src\main\java\com\example\l
+oyaltyapp\fragments\HomeFragment.java:
+44: error: cannot find symbol
+    private Chip chipAll, chipCoffee, 
+chipTea, chipPastries, chipBreakfast, 
+chipLunch;
+            ^
+  symbol:   class Chip
+  location: class HomeFragment
+3 errors
+
+> Task :app:compileDebugJavaWithJavac FAILED
+
+FAILURE: Build failed with an 
+exception.
+
+* What went wrong:
+Execution failed for task 
+':app:compileDebugJavaWithJavac'.
+> Compilation failed; see the 
+compiler error output for details.
+
+* Try:
+> Run with --info option to get more 
+log output.
+> Run with --scan to get full 
+insights.
+
+BUILD FAILED in 14s
+18 actionable tasks: 1 executed, 17 up-to-date
