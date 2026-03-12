@@ -19,10 +19,11 @@ import com.example.loyaltyapp.fragments.ProfileFragment;
 import com.example.loyaltyapp.fragments.RewarsdFragment;
 import com.example.loyaltyapp.fragments.ScanFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.example.loyaltyapp.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.loyaltyapp.viewmodels.MainViewModel;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -36,15 +37,15 @@ public class LoyaltyActivity extends AppCompatActivity {
     private static final String KEY_SELECTED = "selected_menu";
 
     private com.example.loyaltyapp.databinding.ActivityLoyaltyBinding binding;
-    private ListenerRegistration gateListener;
     private BottomNavigationView bottomNav;
+
+    private MainViewModel viewModel;
 
     private int selectedItemId = R.id.homeFragment;
     private boolean profileRequired = false;
     private boolean suppressNavCallback = false;
 
     private FirebaseAuth auth;
-    private FirebaseFirestore db;
     private String uid;
 
     private final Map<Integer, Fragment> fragments = new HashMap<>(5);
@@ -69,7 +70,6 @@ public class LoyaltyActivity extends AppCompatActivity {
         }
 
         auth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
             startActivity(new Intent(this, SignUpActivity.class));
@@ -77,6 +77,8 @@ public class LoyaltyActivity extends AppCompatActivity {
             return;
         }
         uid = user.getUid();
+        
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         bottomNav = binding.bottomNavigation;
         bottomNav.setItemActiveIndicatorColor(null);
@@ -93,7 +95,7 @@ public class LoyaltyActivity extends AppCompatActivity {
             setProfileRequired(true, false);
             selectTabProgrammatically(R.id.profileFragment);
         } else {
-            checkProfileCompletenessAndRoute();
+            viewModel.getCurrentUser().observe(this, this::handleUserDoc);
         }
 
         // Ensure there is an initial fragment visible (prevents empty screen if
@@ -101,32 +103,18 @@ public class LoyaltyActivity extends AppCompatActivity {
         if (getSupportFragmentManager().findFragmentByTag(String.valueOf(selectedItemId)) == null) {
             selectTabProgrammatically(selectedItemId);
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        gateListener = db.collection("meta").document("app_status")
-                .addSnapshotListener((doc, err) -> {
-                    if (err != null || doc == null)
-                        return;
-                    boolean active = Boolean.TRUE.equals(doc.getBoolean("isActive"));
-                    if (!active) {
-                        Intent i = new Intent(this, BlockedActivity.class);
-                        i.putExtra("reason", doc.getString("message"));
-                        startActivity(i);
-                        finish();
-                    }
-                });
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (gateListener != null) {
-            gateListener.remove();
-            gateListener = null;
-        }
+        
+        viewModel.getAppStatus().observe(this, status -> {
+            if (status != null) {
+                boolean active = Boolean.TRUE.equals((Boolean) status.get("isActive"));
+                if (!active) {
+                    Intent i = new Intent(this, BlockedActivity.class);
+                    i.putExtra("reason", (String) status.get("message"));
+                    startActivity(i);
+                    finish();
+                }
+            }
+        });
     }
 
     private void setupBottomNav() {
@@ -193,15 +181,7 @@ public class LoyaltyActivity extends AppCompatActivity {
         return new HomeFragment();
     }
 
-    private void checkProfileCompletenessAndRoute() {
-        db.collection("users").document(uid)
-                .get()
-                .addOnSuccessListener(this::handleUserDoc)
-                .addOnFailureListener(e -> {
-                    setProfileRequired(false, false);
-                    selectTabProgrammatically(selectedItemId);
-                });
-    }
+
 
     private void checkBirthdayReward() {
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
@@ -232,17 +212,17 @@ public class LoyaltyActivity extends AppCompatActivity {
         });
     }
 
-    private void handleUserDoc(DocumentSnapshot doc) {
+    private void handleUserDoc(User user) {
         boolean missing = true;
-        if (doc != null && doc.exists()) {
-            String name = doc.getString("fullName");
-            String bday = doc.getString("birthday");
-            String gender = doc.getString("gender");
-            Boolean verified = doc.getBoolean("isVerified");
+        if (user != null) {
+            String name = user.getFullName();
+            String bday = user.getBirthday();
+            String gender = user.getGender();
+            boolean verified = user.isVerified();
             missing = (name == null || name.trim().isEmpty()
                     || bday == null || bday.trim().isEmpty()
                     || gender == null || gender.trim().isEmpty()
-                    || !Boolean.TRUE.equals(verified));
+                    || !verified);
         }
         if (missing) {
             setProfileRequired(true, true);
