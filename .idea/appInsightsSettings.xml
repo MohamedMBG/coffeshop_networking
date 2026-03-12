@@ -14,7 +14,7 @@
                   <option name="projectNumber" value="939474395909" />
                 </ConnectionSetting>
               </option>
-              <option name="signal" value="SIGNAL_UNSPECIFIED" />
+              <option name="" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />
             </InsightsFilterSettings>
