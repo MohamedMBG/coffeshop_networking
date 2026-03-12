@@ -28,8 +28,13 @@ public class RewardsViewModel extends ViewModel {
     private String activeFilter = "all";
 
     public RewardsViewModel() {
-        rewardsRepo = new RewardsRepository();
-        userRepo = new UserRepository();
+        this(new RewardsRepository(), new UserRepository());
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public RewardsViewModel(RewardsRepository rewardsRepo, UserRepository userRepo) {
+        this.rewardsRepo = rewardsRepo;
+        this.userRepo = userRepo;
         
         // Listen to User objects instead of DocumentSnapshot
         userData.observeForever(user -> {

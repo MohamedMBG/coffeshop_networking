@@ -21,12 +21,17 @@ public class MainViewModel extends ViewModel {
     private final MutableLiveData<User> currentUser = new MutableLiveData<>();
 
     public MainViewModel() {
-        configRepo = new ConfigRepository();
-        userRepo = new UserRepository();
+        this(new ConfigRepository(), new UserRepository(), FirebaseAuth.getInstance());
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public MainViewModel(ConfigRepository configRepo, UserRepository userRepo, FirebaseAuth auth) {
+        this.configRepo = configRepo;
+        this.userRepo = userRepo;
 
         configRepo.listenToAppStatus(appStatus);
 
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser firebaseUser = auth.getCurrentUser();
         if (firebaseUser != null) {
             userRepo.listenToUser(firebaseUser.getUid(), currentUser);
         }

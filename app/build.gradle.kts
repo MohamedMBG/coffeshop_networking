@@ -55,7 +55,9 @@ dependencies {
     // Testing libraries
     testImplementation("org.robolectric:robolectric:4.10.3")
     testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-inline:4.11.0")
     testImplementation("androidx.test:core:1.5.0")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     //added
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)

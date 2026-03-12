@@ -23,8 +23,13 @@ public class ScanViewModel extends ViewModel {
     private final MutableLiveData<ScanState> scanState = new MutableLiveData<>();
 
     public ScanViewModel() {
-        repository = new ScanRepository();
-        auth = FirebaseAuth.getInstance();
+        this(new ScanRepository(), FirebaseAuth.getInstance());
+    }
+
+    @androidx.annotation.VisibleForTesting
+    public ScanViewModel(ScanRepository repository, FirebaseAuth auth) {
+        this.repository = repository;
+        this.auth = auth;
     }
 
     public LiveData<ScanState> getScanState() {
