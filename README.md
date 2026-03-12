@@ -24,3 +24,6 @@ A premium Android loyalty program and reward tracking application built for coff
 - `viewmodels/` - LiveData holding objects responding to the UI and speaking to the repositories.
 - `models/` - Standard Java POJO mapped classes for database entities.
 
+--incoming MVVM architecture
+
+
