@@ -8,7 +8,17 @@ public class User {
     private String gender;
     private int points;
     private int visits;
+    // P0 security: isVerified is read-only from the client's perspective.
+    // It represents email/account verification and is set only by the
+    // backend (after /api/verify succeeds) or by Firestore security rules.
+    // The client must not call setVerified() to persist a true value.
     private boolean isVerified;
+
+    // Client-owned flag indicating the user has filled out their profile
+    // (name, birthday, gender, phone, address). Drives in-app routing only.
+    // Decoupled from isVerified so that filling the profile does not grant
+    // the user a "verified" trust claim.
+    private boolean profileComplete;
 
     private String phone;
     private String address;
@@ -66,6 +76,9 @@ public class User {
 
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean verified) { isVerified = verified; }
+
+    public boolean isProfileComplete() { return profileComplete; }
+    public void setProfileComplete(boolean profileComplete) { this.profileComplete = profileComplete; }
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }

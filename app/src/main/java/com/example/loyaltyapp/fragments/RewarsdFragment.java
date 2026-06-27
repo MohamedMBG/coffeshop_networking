@@ -161,27 +161,25 @@ public class RewarsdFragment extends Fragment {
         }
     }
 
-    // redeeming reward
-    private void redeemReward(@NonNull final Rewards r) {
-        viewModel.redeemReward(r);
-    }
     private static String safeString(String s) {
         return (s == null) ? "" : s;
     }
 
+    // Redemption is intentionally disabled until backend issues a redeem
+    // code and confirms it at the cashier. Do NOT call viewModel.redeemReward
+    // from the client — Firestore rules block client-side points mutation
+    // and any deduction here would only succeed against an unsecured DB.
     private void onRedeemClicked(@NonNull Rewards r) {
         if (userPoints < r.redeemPoints) {
             Toast.makeText(requireContext(), "Not enough points yet", Toast.LENGTH_SHORT).show();
             return;
         }
-        // TODO: call your redeem endpoint / Cloud Function here.
-        Snackbar.make(requireView(), "Redeem " + r.name + " for " + r.redeemPoints + " points: bientôt!",
+        Snackbar.make(requireView(),
+                "Redemption coming soon. Your points are safe.",
                 Snackbar.LENGTH_LONG)
                 .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
-                .setAction("OK", v -> {
-                })
+                .setAction("OK", v -> { })
                 .show();
-        redeemReward(r);
     }
 
         // showLoadError is no longer needed since errors are handled by observing getErrorMessage() in onViewCreated

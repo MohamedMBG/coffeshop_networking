@@ -170,7 +170,7 @@ public class ProfileFragment extends Fragment {
         String birthday = user.getBirthday();
         String gender = user.getGender();
         Long points = (long) user.getPoints();
-        Boolean verified = user.isVerified();
+        Boolean profileComplete = user.isProfileComplete();
         String phone = user.getPhone();
         String address = user.getAddress();
 
@@ -184,10 +184,13 @@ public class ProfileFragment extends Fragment {
         tvPoints.setText(points != null ? String.valueOf(points) : "0");
         tvPhone.setText(!TextUtils.isEmpty(phone) ? phone : getString(R.string.profile_phone_placeholder));
 
-        boolean isVerified = verified != null ? verified : false;
-        editCard.setVisibility(isVerified ? View.GONE : View.VISIBLE);
+        // P0 security: hide the edit card once profileComplete is true.
+        // Previously this used isVerified, which is now backend-owned and
+        // not changed by the client filling the form.
+        boolean complete = profileComplete != null ? profileComplete : false;
+        editCard.setVisibility(complete ? View.GONE : View.VISIBLE);
 
-        if (!isVerified) {
+        if (!complete) {
             if (inputFullName != null && TextUtils.isEmpty(inputFullName.getText()))
                 inputFullName.setText(fullName != null ? fullName : "");
             if (inputBirthday != null && TextUtils.isEmpty(inputBirthday.getText()))

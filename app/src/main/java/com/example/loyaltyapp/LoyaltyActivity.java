@@ -218,11 +218,13 @@ public class LoyaltyActivity extends AppCompatActivity {
             String name = user.getFullName();
             String bday = user.getBirthday();
             String gender = user.getGender();
-            boolean verified = user.isVerified();
+            // P0 security: gate on profileComplete (UI flag) not isVerified
+            // (backend trust flag). See User.java field comments.
+            boolean complete = user.isProfileComplete();
             missing = (name == null || name.trim().isEmpty()
                     || bday == null || bday.trim().isEmpty()
                     || gender == null || gender.trim().isEmpty()
-                    || !verified);
+                    || !complete);
         }
         if (missing) {
             setProfileRequired(true, true);

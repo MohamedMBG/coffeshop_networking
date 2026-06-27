@@ -86,9 +86,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleUserDoc(DocumentSnapshot snapshot) {
-        boolean verified = snapshot.exists() && Boolean.TRUE.equals(snapshot.getBoolean("isVerified"));
+        // P0 security: route on profileComplete (client-owned UI flag), not
+        // isVerified (backend-owned trust claim). Prior code used isVerified
+        // for routing which conflated "profile filled" with "email verified".
+        boolean complete = snapshot.exists()
+                && Boolean.TRUE.equals(snapshot.getBoolean("profileComplete"));
 
-        if (verified) goToLoyalty(false);
+        if (complete) goToLoyalty(false);
         else goToLoyalty(true);
     }
 

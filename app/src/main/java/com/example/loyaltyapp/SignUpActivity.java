@@ -64,14 +64,16 @@ public class SignUpActivity extends AppCompatActivity {
         FirebaseUser u = auth.getCurrentUser();
         if (u != null && !u.isAnonymous()) {
             Log.i(TAG, "User already signed in: " + u.getUid());
+            // P0 security: never log raw FCM token value. Token is a long-lived
+            // device credential. Anyone who reads logcat (USB, crash reports,
+            // logging libs) could impersonate the device and receive its pushes.
             FirebaseMessaging.getInstance().getToken()
                     .addOnSuccessListener(t -> {
-                        Log.i("FCM", "existing user getToken() -> " + t);
                         if (t != null && !t.isEmpty()) {
                             TokenRegistrar.ensureDevice(t, "client");
                         }
                     })
-                    .addOnFailureListener(e -> Log.w("FCM", "existing user getToken failed: " + e.getMessage()));
+                    .addOnFailureListener(e -> Log.w("FCM", "existing user getToken failed"));
             goToMain(false);
             return;
         }
@@ -155,15 +157,15 @@ public class SignUpActivity extends AppCompatActivity {
                             ensureUserDocAndRoute(fu.getUid(), vr.email);
 
                             // Force-get FCM token once after fresh sign-in and upsert it.
+                            // P0 security: do not log fcmToken value (device credential).
                             FirebaseMessaging.getInstance().getToken()
                                     .addOnSuccessListener(fcmToken -> {
-                                        Log.i("FCM", "fresh sign-in getToken() -> " + fcmToken);
                                         if (fcmToken != null && !fcmToken.isEmpty()) {
                                             TokenRegistrar.ensureDevice(fcmToken, "client");
                                         }
                                     })
                                     .addOnFailureListener(
-                                            e -> Log.w("FCM", "fresh sign-in getToken failed: " + e.getMessage()));
+                                            e -> Log.w("FCM", "fresh sign-in getToken failed"));
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "signInWithCustomToken failed", e);
@@ -190,29 +192,33 @@ public class SignUpActivity extends AppCompatActivity {
         userRef.get().addOnSuccessListener(doc -> {
             boolean exists = doc.exists();
 
+            // P0 security: do NOT read or write `isVerified` here. That field is
+            // now owned by the backend (set true only after email verify succeeds
+            // server-side). Routing decisions use `profileComplete` instead,
+            // which is a separate client-owned flag for "user filled the form".
             String fullName = exists ? doc.getString("fullName") : null;
             String birthday = exists ? doc.getString("birthday") : null;
             String gender = exists ? doc.getString("gender") : null;
-            Number pointsN = exists ? doc.getLong("points") : null;
-            Number visitsN = exists ? doc.getLong("visits") : null;
-            Boolean verifiedB = exists ? doc.getBoolean("isVerified") : null;
+            Boolean profileCompleteB = exists ? doc.getBoolean("profileComplete") : null;
             String emailInDoc = exists ? doc.getString("email") : null;
 
-            int points = pointsN == null ? 0 : pointsN.intValue();
-            int visits = visitsN == null ? 0 : visitsN.intValue();
-            boolean isVerified = verifiedB != null ? verifiedB : false;
+            boolean profileComplete = profileCompleteB != null && profileCompleteB;
 
             Map<String, Object> up = new HashMap<>();
             up.put("uid", uid);
             up.put("email", emailInDoc != null ? emailInDoc.toLowerCase() : emailLower);
-            up.put("gender", gender != null ? gender : "");
-            up.put("isVerified", isVerified);
+            // Create branch only: seed all empty profile fields plus
+            // profileComplete=false. Firestore rules permit create only when
+            // points/visits/isVerified are absent or zero/false. We deliberately
+            // omit `points`/`visits`/`isVerified` so backend remains sole owner
+            // of those fields.
             if (!exists) {
-                up.put("fullName", fullName != null ? fullName : "");
-                up.put("birthday", birthday != null ? birthday : "");
-                up.put("points", points);
-                up.put("visits", visits);
-                up.put("isVerified", isVerified);
+                up.put("fullName", "");
+                up.put("birthday", "");
+                up.put("gender", "");
+                up.put("phone", "");
+                up.put("address", "");
+                up.put("profileComplete", false);
                 up.put("createdAt", FieldValue.serverTimestamp());
             }
             up.put("updatedAt", FieldValue.serverTimestamp());
@@ -222,7 +228,7 @@ public class SignUpActivity extends AppCompatActivity {
                         boolean missingProfile = (fullName == null || fullName.trim().isEmpty()) ||
                                 (birthday == null || birthday.trim().isEmpty()) ||
                                 (gender == null || gender.trim().isEmpty()) ||
-                                !isVerified;
+                                !profileComplete;
                         goToMain(missingProfile);
                     })
                     .addOnFailureListener(e -> {
