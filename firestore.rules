@@ -1,0 +1,112 @@
+rules_version = '2';
+
+// Loyalty app Firestore security rules.
+// Principle: clients NEVER write points/visits/isVerified/balances.
+// All economy mutations (earn, spend, redeem, birthday bonus) MUST go
+// through trusted server code (Cloud Functions / backend with Admin SDK)
+// which bypasses these rules. Clients only update their own profile
+// metadata and read their own records.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Fields the client is allowed to touch on its own user doc.
+    function allowedUserFields() {
+      return ['fullName', 'birthday', 'gender', 'phone', 'address',
+              'profileComplete', 'email', 'uid', 'updatedAt'];
+    }
+
+    // Fields the client must NEVER write directly.
+    function protectedUserFields() {
+      return ['points', 'visits', 'isVerified', 'lastVisitTimestamp',
+              'createdAt'];
+    }
+
+    function onlyAllowedFields(allowed) {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(allowed);
+    }
+
+    function doesNotTouch(protected) {
+      return !request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(protected);
+    }
+
+    // ===== users/{uid} =====
+    match /users/{uid} {
+      allow read: if isUser(uid);
+
+      // First-time create on sign-in: must be self, must NOT pre-set
+      // points/visits/isVerified to anything truthy from client.
+      allow create: if isUser(uid)
+        && request.resource.data.get('isVerified', false) == false
+        && request.resource.data.get('points', 0) == 0
+        && request.resource.data.get('visits', 0) == 0;
+
+      // Updates: only profile fields. Economy + verification untouched.
+      allow update: if isUser(uid)
+        && onlyAllowedFields(allowedUserFields())
+        && doesNotTouch(protectedUserFields());
+
+      allow delete: if false;
+
+      // Activity history — read own, writes only from server.
+      match /activities/{activityId} {
+        allow read: if isUser(uid);
+        allow write: if false;
+      }
+    }
+
+    // ===== Public catalogs (read-only to clients) =====
+    match /menu_items/{itemId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /rewards_catalog/{rewardId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /meta/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ===== Voucher / redeem codes (server-issued, server-confirmed) =====
+    // Clients may read a code by ID (scan flow) but cannot create or
+    // mutate. Earn/spend/redeem state transitions happen on backend.
+    match /earn_codes/{voucherId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    match /redeem_codes/{redeemId} {
+      allow read: if isSignedIn()
+        && resource.data.get('userUid', '') == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Devices collection (FCM tokens) — server-managed.
+    match /devices/{deviceId} {
+      allow read, write: if false;
+    }
+
+    // Default deny.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

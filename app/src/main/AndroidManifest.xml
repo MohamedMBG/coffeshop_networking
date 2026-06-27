@@ -15,8 +15,12 @@
         android:name="android.hardware.camera.flash"
         android:required="false" />
 
+    <!-- P0 security: allowBackup disabled. Firebase auth state, FCM token,
+         and SharedPreferences would otherwise be copied to Google Drive
+         under the user's account, allowing trivial credential lift via
+         adb restore on a rooted attacker device. -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/icon_logo"

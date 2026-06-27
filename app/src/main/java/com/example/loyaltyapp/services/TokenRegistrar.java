@@ -53,8 +53,11 @@ public final class TokenRegistrar {
                     String bearer = res.getToken();
                     upsertDevice(url, body, bearer);
                 }).addOnFailureListener(e -> {
-                    Log.w(TAG, "getIdToken failed, sending without bearer: " + e.getMessage());
-                    upsertDevice(url, body, null);
+                    // P0 security: previously this fell back to upsertDevice(..., null),
+                    // sending the FCM token to the backend without a bearer. That makes
+                    // the registerDevice endpoint un-authenticatable. Skip the call when
+                    // we can't prove who we are.
+                    Log.w(TAG, "getIdToken failed; skipping device upsert");
                 });
             } else {
                 upsertDevice(url, body, null);
@@ -96,19 +99,18 @@ public final class TokenRegistrar {
             }
 
             Request req = rb.build();
-            Log.i(TAG, "POST " + url + " body=" + body.toString());
 
+            // P0 security: do NOT log request body or response body. Body contains
+            // the raw FCM token; response may echo it back along with backend
+            // device IDs. Only log HTTP status codes for diagnostics.
             HTTP.newCall(req).enqueue(new Callback() {
                 @Override public void onFailure(Call call, java.io.IOException e) {
-                    Log.e(TAG, "registerDevice network error", e);
+                    Log.e(TAG, "registerDevice network error");
                 }
 
                 @Override public void onResponse(Call call, Response response) {
                     try {
-                        String respStr = response.body() != null ? response.body().string() : "";
-                        Log.i(TAG, "registerDevice response code=" + response.code() + " body=" + respStr);
-                    } catch (Exception e) {
-                        Log.w(TAG, "registerDevice read body failed", e);
+                        Log.i(TAG, "registerDevice response code=" + response.code());
                     } finally {
                         if (response.body() != null) response.body().close();
                     }

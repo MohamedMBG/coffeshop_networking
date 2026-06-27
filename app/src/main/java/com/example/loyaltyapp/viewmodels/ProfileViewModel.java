@@ -62,7 +62,10 @@ public class ProfileViewModel extends ViewModel {
         update.put("gender", gender);
         update.put("phone", formattedPhone);
         update.put("address", address);
-        update.put("isVerified", true);
+        // P0 security: was previously `isVerified=true`. The client must not
+        // self-grant email verification — that's now backend-only. We instead
+        // write `profileComplete`, a separate flag that only gates UI routing.
+        update.put("profileComplete", true);
 
         saveState.setValue(new SaveState(true, "Saving...", false));
 

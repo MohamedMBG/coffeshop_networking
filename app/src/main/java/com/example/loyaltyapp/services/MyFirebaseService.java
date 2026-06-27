@@ -15,7 +15,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class MyFirebaseService extends FirebaseMessagingService {
     @Override public void onNewToken(@NonNull String token) {
-        android.util.Log.i("FCM", "onNewToken -> " + token);
+        // P0 security: do not log the token value. Forward to backend only.
         TokenRegistrar.ensureDevice(token, "client");
     }
 
