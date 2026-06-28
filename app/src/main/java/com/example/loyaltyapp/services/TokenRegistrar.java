@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.loyaltyapp.BuildConfig;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -24,8 +25,14 @@ import okhttp3.Response;
 
 public final class TokenRegistrar {
     private static final String TAG = "TokenRegistrar";
-    // Your backend base URL
-    private static final String API_BASE = "https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app";
+    // P1: backend base URL pulled from BuildConfig. ApiClient.BASE_URL ends
+    // with a trailing slash; strip it so concatenated paths like
+    // "/api/push/registerDevice" don't double up.
+    private static final String API_BASE = stripTrailingSlash(BuildConfig.API_BASE_URL);
+
+    private static String stripTrailingSlash(String s) {
+        return (s != null && s.endsWith("/")) ? s.substring(0, s.length() - 1) : s;
+    }
 
     private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");

@@ -16,7 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.loyaltyapp.fragments.ActivityFragment;
 import com.example.loyaltyapp.fragments.HomeFragment;
 import com.example.loyaltyapp.fragments.ProfileFragment;
-import com.example.loyaltyapp.fragments.RewarsdFragment;
+import com.example.loyaltyapp.fragments.RewardsFragment;
 import com.example.loyaltyapp.fragments.ScanFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.example.loyaltyapp.models.User;
@@ -146,7 +146,17 @@ public class LoyaltyActivity extends AppCompatActivity {
         if (selectedItemId == menuId && fragments.containsKey(menuId))
             return;
 
-        FragmentTransaction tx = getSupportFragmentManager().beginTransaction();
+        // P1: skip the transaction entirely if the FragmentManager has already
+        // saved its state. Previously this used commitAllowingStateLoss(),
+        // which silently dropped tab-switch state during onSaveInstanceState
+        // and produced inconsistent restoration. Bouncing the switch is safer
+        // than losing the user's selected tab.
+        androidx.fragment.app.FragmentManager fm = getSupportFragmentManager();
+        if (fm.isStateSaved() || fm.isDestroyed()) {
+            return;
+        }
+
+        FragmentTransaction tx = fm.beginTransaction();
 
         Fragment current = fragments.get(selectedItemId);
         if (current != null && current.isAdded())
@@ -163,7 +173,7 @@ public class LoyaltyActivity extends AppCompatActivity {
             tx.add(R.id.nav_host_fragment, target, String.valueOf(menuId));
         }
 
-        tx.setReorderingAllowed(true).commitAllowingStateLoss();
+        tx.setReorderingAllowed(true).commit();
         selectedItemId = menuId;
     }
 
@@ -177,7 +187,7 @@ public class LoyaltyActivity extends AppCompatActivity {
         if (menuId == R.id.profileFragment)
             return new ProfileFragment();
         if (menuId == R.id.rewardsFragment)
-            return new RewarsdFragment(); // ✅ correct
+            return new RewardsFragment(); // ✅ correct
         return new HomeFragment();
     }
 

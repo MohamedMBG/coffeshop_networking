@@ -21,7 +21,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.ObjectKey;
 import com.example.loyaltyapp.R;
 import com.example.loyaltyapp.models.MenuItemModel;
-import com.example.loyaltyapp.ui.MenuAdapter;
+import com.example.loyaltyapp.adapters.MenuAdapter;
 import com.example.loyaltyapp.viewmodels.HomeViewModel;
 import com.google.firebase.Timestamp;
 
@@ -92,7 +92,8 @@ public class HomeFragment extends Fragment {
         adapter = new MenuAdapter(new ArrayList<MenuItemModel>(), new MenuAdapter.OnItemClick() {
             @Override
             public void onClick(@NonNull MenuItemModel item) {
-                // TODO: open item details / add to cart
+                // P1: menu items are display-only until the ordering / add-to-cart
+                // flow exists. No-op intentionally; tapping is non-interactive.
             }
         });
         menuRv.setAdapter(adapter);

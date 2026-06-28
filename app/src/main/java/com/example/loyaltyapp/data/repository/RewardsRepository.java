@@ -158,22 +158,27 @@ public class RewardsRepository {
         });
     }
 
-    // Helper model for transaction logging
+    /**
+     * P1: aligned to the normalized activity log schema (see ActivityEvent
+     * javadoc). Renamed `rewardId` to `refId` so all activity sources write
+     * the same field names. Firestore POJO serialization writes public fields
+     * verbatim.
+     */
     public static class RedemptionLog {
         public String type;
         public Timestamp ts;
         public int delta;
         public String desc;
-        public String rewardId;
+        public String refId;
         public String status;
 
         public RedemptionLog() {}
-        public RedemptionLog(String type, Timestamp ts, int delta, String desc, String rewardId, String status) {
+        public RedemptionLog(String type, Timestamp ts, int delta, String desc, String refId, String status) {
             this.type = type;
             this.ts = ts;
             this.delta = delta;
             this.desc = desc;
-            this.rewardId = rewardId;
+            this.refId = refId;
             this.status = status;
         }
     }

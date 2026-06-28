@@ -34,11 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RewarsdFragment extends Fragment {
+public class RewardsFragment extends Fragment {
 
     private static final String TAG = "RewardsFragment";
 
-    private com.example.loyaltyapp.databinding.FragmentRewarsdBinding binding;
+    private com.example.loyaltyapp.databinding.FragmentRewardsBinding binding;
 
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recycler;
@@ -52,14 +52,14 @@ public class RewarsdFragment extends Fragment {
     private RewardAdapter adapter;
     private int userPoints = 0;
 
-    public RewarsdFragment() {
+    public RewardsFragment() {
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        binding = com.example.loyaltyapp.databinding.FragmentRewarsdBinding.inflate(inflater, container, false);
+        binding = com.example.loyaltyapp.databinding.FragmentRewardsBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
