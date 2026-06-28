@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "loyalty app"
+rootProject.name = "bean loyal"
 include(":app")
  
