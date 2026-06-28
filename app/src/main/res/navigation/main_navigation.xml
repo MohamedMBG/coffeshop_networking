@@ -25,9 +25,9 @@
 
     <fragment
         android:id="@+id/rewardsFragment"
-        android:name="com.example.loyaltyapp.fragments.RewarsdFragment"
+        android:name="com.example.loyaltyapp.fragments.RewardsFragment"
         android:label="Rewards"
-        tools:layout="@layout/fragment_rewarsd" />
+        tools:layout="@layout/fragment_rewards" />
 
     <fragment
         android:id="@+id/profileFragment"

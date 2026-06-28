@@ -2,6 +2,7 @@ package com.example.loyaltyapp.viewmodels;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import com.example.loyaltyapp.data.repository.RewardsRepository;
@@ -24,7 +25,18 @@ public class RewardsViewModel extends ViewModel {
     // Listen to real-time points from UserRepository
     private final MutableLiveData<User> userData = new MutableLiveData<>();
     private final MutableLiveData<Integer> userPoints = new MutableLiveData<>(0);
-    
+
+    // P1: hold a reference to the observer so we can remove it in onCleared.
+    // Previously the lambda was passed directly to observeForever with no way
+    // to unregister, which leaked the ViewModel for the lifetime of the
+    // LiveData (and the LiveData for as long as anything held this VM).
+    private final Observer<User> userObserver = new Observer<User>() {
+        @Override
+        public void onChanged(User user) {
+            userPoints.postValue(user != null ? user.getPoints() : 0);
+        }
+    };
+
     private String activeFilter = "all";
 
     public RewardsViewModel() {
@@ -35,15 +47,8 @@ public class RewardsViewModel extends ViewModel {
     public RewardsViewModel(RewardsRepository rewardsRepo, UserRepository userRepo) {
         this.rewardsRepo = rewardsRepo;
         this.userRepo = userRepo;
-        
-        // Listen to User objects instead of DocumentSnapshot
-        userData.observeForever(user -> {
-            if (user != null) {
-                userPoints.postValue(user.getPoints());
-            } else {
-                userPoints.postValue(0);
-            }
-        });
+
+        userData.observeForever(userObserver);
 
         loadRewards();
     }
@@ -134,6 +139,9 @@ public class RewardsViewModel extends ViewModel {
     @Override
     protected void onCleared() {
         super.onCleared();
+        // P1: pair the observeForever in the constructor with explicit removal
+        // so the ViewModel can be GC'd once the screen is gone.
+        userData.removeObserver(userObserver);
         userRepo.cleanup();
     }
 

@@ -35,57 +35,53 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int pos) {
         ActivityEvent e = data.get(pos);
 
-        // ---- Title
+        // P1: bind against the normalized schema (type/delta/desc/refId).
+        // ActivityEvent.fromDoc already translates legacy aliases ("scan",
+        // "redeem") into the canonical type values, so we no longer need
+        // string-OR branches per type here.
+
         String title;
-        if ("scan".equals(e.type)) {
-            title = "Scan" + (e.storeName != null && !e.storeName.isEmpty() ? " — " + e.storeName : "");
-        } else if ("redemption".equals(e.type) || "redeem".equals(e.type)) {
-            title = "Redemption";
-        } else if ("bonus".equals(e.type)) {
+        if (ActivityEvent.TYPE_EARN.equals(e.type)) {
+            title = "Scan" + (e.desc != null && !e.desc.isEmpty() ? " — " + e.desc : "");
+        } else if (ActivityEvent.TYPE_REDEMPTION.equals(e.type)) {
+            title = "Redemption" + (e.desc != null && !e.desc.isEmpty() ? " — " + e.desc : "");
+        } else if (ActivityEvent.TYPE_SPEND.equals(e.type)) {
+            title = e.desc != null && !e.desc.isEmpty() ? e.desc : "Spend";
+        } else if (ActivityEvent.TYPE_BONUS.equals(e.type)) {
             title = "Bonus";
         } else {
             title = "Activity";
         }
         h.activityTitle.setText(title);
 
-        // ---- Date/time
         if (e.ts != null) {
             h.activityDateTime.setText(fmt.format(e.ts.toDate()));
         } else {
             h.activityDateTime.setText("—");
         }
 
-        // ---- Points display
-        int displayPts = e.points;
-        // For redemption, ensure points are shown negative even if stored positive
-        if (("redemption".equals(e.type) || "redeem".equals(e.type)) && displayPts > 0) {
-            displayPts = -displayPts;
-        }
-
-        String sign = displayPts > 0 ? "+" : ""; // negatives already include '-'
+        // delta is already signed; just prepend '+' for positives.
+        int displayPts = e.delta;
+        String sign = displayPts > 0 ? "+" : "";
         h.activityPoints.setText(sign + displayPts);
 
-        // ---- Icon + background + text color
-        if ("scan".equals(e.type) || "earn".equals(e.type)) {
-            // Earned points
+        if (ActivityEvent.TYPE_EARN.equals(e.type)) {
             h.activityIcon.setImageResource(R.drawable.ic_scan);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn); // green-ish bg
-            h.activityPoints.setTextColor(0xFF4CAF50); // 🟩 green
-        } else if ("redemption".equals(e.type) || "redeem".equals(e.type) || "spend".equals(e.type)) {
-            // Redeemed points
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
+            h.activityPoints.setTextColor(0xFF4CAF50);
+        } else if (ActivityEvent.TYPE_REDEMPTION.equals(e.type)
+                || ActivityEvent.TYPE_SPEND.equals(e.type)) {
             h.activityIcon.setImageResource(R.drawable.ic_gift);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend); // red-ish bg (if you have one)
-            h.activityPoints.setTextColor(0xFFD32F2F); // 🔴 red
-        } else if ("bonus".equals(e.type)) {
-            // Bonus points
-            h.activityIcon.setImageResource(R.drawable.ic_star);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus); // yellow-ish bg
-            h.activityPoints.setTextColor(0xFFFFC107); // 🟡 yellow
-        } else {
-            // Default
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend);
+            h.activityPoints.setTextColor(0xFFD32F2F);
+        } else if (ActivityEvent.TYPE_BONUS.equals(e.type)) {
             h.activityIcon.setImageResource(R.drawable.ic_star);
             h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
-            h.activityPoints.setTextColor(0xFFFFC107); // 🟡 yellow default
+            h.activityPoints.setTextColor(0xFFFFC107);
+        } else {
+            h.activityIcon.setImageResource(R.drawable.ic_star);
+            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
+            h.activityPoints.setTextColor(0xFFFFC107);
         }
     }
 

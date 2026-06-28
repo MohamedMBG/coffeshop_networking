@@ -88,10 +88,13 @@ public class ScanRepository {
 
             transaction.update(userRef, uUpd);
 
+            // P1: normalized activity log schema. See ActivityEvent javadoc.
+            // Fields: type / delta / desc / refId / ts (status omitted for earn).
             Map<String, Object> log = new HashMap<>();
             log.put("type", "earn");
-            log.put("points", pointsVal);
-            log.put("voucherId", voucherId);
+            log.put("delta", pointsVal);
+            log.put("desc", "");
+            log.put("refId", voucherId);
             log.put("ts", new Timestamp(now));
             transaction.set(activityRef, log);
 
@@ -161,11 +164,13 @@ public class ScanRepository {
             rUpd.put("completedByUid", currentUserUid);
             transaction.update(redeemRef, rUpd);
 
+            // P1: normalized activity log schema. See ActivityEvent javadoc.
             Map<String, Object> log = new HashMap<>();
             log.put("type", "spend");
-            log.put("points", -costPoints);
-            log.put("item", itemName);
-            log.put("redeemCodeId", redeemDocId);
+            log.put("delta", -costPoints);
+            log.put("desc", itemName != null ? itemName : "");
+            log.put("refId", redeemDocId);
+            log.put("status", "completed");
             log.put("ts", FieldValue.serverTimestamp());
             transaction.set(activityRef, log);
 

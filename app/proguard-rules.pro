@@ -1,21 +1,79 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ============================================================
+# Project ProGuard / R8 configuration.
+# Active when `release { isMinifyEnabled = true }` in build.gradle.kts.
+# ============================================================
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep filename + line numbers in stack traces from Crashlytics / logcat.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep generic signatures (needed for Retrofit + Gson reflection).
+-keepattributes Signature
+-keepattributes *Annotation*
+-keepattributes EnclosingMethod
+-keepattributes InnerClasses
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ------------------------------------------------------------
+# Firebase Firestore / Auth POJOs.
+# Firestore deserializes documents via reflection into our model classes;
+# fields must keep their names. Listing all models explicitly is more
+# precise than a wildcard on com.example.**.
+# ------------------------------------------------------------
+-keep class com.example.loyaltyapp.models.** { *; }
+-keepclassmembers class com.example.loyaltyapp.models.** { *; }
+-keep class com.example.loyaltyapp.data.repository.RewardsRepository$RedemptionLog { *; }
+
+# Keep no-arg constructors on POJOs (Firestore requirement).
+-keepclassmembers class * {
+    public <init>();
+}
+
+# Firebase internal: preserve everything to avoid surprise NoSuchMethodError.
+-keep class com.google.firebase.** { *; }
+-keepnames class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+
+# ------------------------------------------------------------
+# Retrofit + OkHttp + Gson
+# ------------------------------------------------------------
+-keep class retrofit2.** { *; }
+-keepclasseswithmembers class * { @retrofit2.http.* <methods>; }
+-keep class okhttp3.** { *; }
+-keep interface okhttp3.** { *; }
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn retrofit2.**
+
+-keep class com.google.gson.** { *; }
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Our API DTOs (Gson reflects into them).
+-keep class com.example.loyaltyapp.ApiService$* { *; }
+
+# ------------------------------------------------------------
+# Glide
+# ------------------------------------------------------------
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.AppGlideModule
+-keep class com.bumptech.glide.GeneratedAppGlideModuleImpl { *; }
+-keep public enum com.bumptech.glide.load.ImageHeaderParser$** { **[] $VALUES; public *; }
+-dontwarn com.bumptech.glide.**
+
+# ------------------------------------------------------------
+# ZXing (QR scanner) — uses reflection to load decoder backends.
+# ------------------------------------------------------------
+-keep class com.google.zxing.** { *; }
+-keep class com.journeyapps.barcodescanner.** { *; }
+-dontwarn com.google.zxing.**
+-dontwarn com.journeyapps.barcodescanner.**
+
+# ------------------------------------------------------------
+# AndroidX / Material — generally safe defaults are bundled with R8,
+# but keep ViewBinding generated classes accessed by reflection.
+# ------------------------------------------------------------
+-keep class * implements androidx.viewbinding.ViewBinding {
+    public static *** inflate(...);
+    public static *** bind(android.view.View);
+}

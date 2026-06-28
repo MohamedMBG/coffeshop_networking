@@ -1,4 +1,4 @@
-# Loyalty App
+# bean loyal
 
 A premium Android loyalty program and reward tracking application built for coffee shops and cafes. This app allows customers to register, build a profile, earn points via a backend-secured reward system, and browse a real-time menu.
 

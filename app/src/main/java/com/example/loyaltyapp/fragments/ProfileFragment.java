@@ -114,16 +114,19 @@ public class ProfileFragment extends Fragment {
         btnSave.setOnClickListener(x -> collectAndSaveProfile());
 
         logoutLayout.setOnClickListener(v1 -> logOut());
+        // P1: placeholder rows kept visible (matches PRD navigation) but the
+        // backing screens don't exist yet. Honest "coming soon" message until
+        // the real flows ship.
         if (layoutNotifications != null)
-            layoutNotifications.setOnClickListener(x -> showSnack("Notifications: bientôt"));
+            layoutNotifications.setOnClickListener(x -> showSnack("Notifications coming soon"));
         if (layoutSavedRewards != null)
-            layoutSavedRewards.setOnClickListener(x -> showSnack("Saved rewards: bientôt"));
+            layoutSavedRewards.setOnClickListener(x -> showSnack("Saved rewards coming soon"));
         if (layoutHelp != null)
-            layoutHelp.setOnClickListener(x -> showSnack("Help: bientôt"));
+            layoutHelp.setOnClickListener(x -> showSnack("Help coming soon"));
         if (layoutTerms != null)
-            layoutTerms.setOnClickListener(x -> showSnack("Terms: bientôt"));
+            layoutTerms.setOnClickListener(x -> showSnack("Terms coming soon"));
         if (layoutPrivacy != null)
-            layoutPrivacy.setOnClickListener(x -> showSnack("Privacy: bientôt"));
+            layoutPrivacy.setOnClickListener(x -> showSnack("Privacy coming soon"));
 
         // Initialize fetching data
         viewModel.init(user.getUid());

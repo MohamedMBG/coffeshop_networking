@@ -1,4 +1,4 @@
-package com.example.loyaltyapp.ui;
+package com.example.loyaltyapp.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;

@@ -23,7 +23,8 @@ public class ActivityViewModel extends ViewModel {
     private final MutableLiveData<Date> lastScanTime = new MutableLiveData<>();
 
     private List<ActivityEvent> allEvents = new ArrayList<>();
-    private String typeFilter = "all"; // all|scan|redemption|bonus
+    // P1: filter values match the normalized ActivityEvent type enum.
+    private String typeFilter = "all"; // all|earn|spend|redemption|bonus
     private Date fromDate = null;
     private Date toDate = null;
 
