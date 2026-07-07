@@ -4,6 +4,15 @@ import androidx.annotation.Nullable;
 
 import com.example.loyaltyapp.network.ApiResponse;
 import com.example.loyaltyapp.network.IdempotencyKey;
+import com.example.loyaltyapp.network.contract.BirthdayResult;
+import com.example.loyaltyapp.network.contract.CancelRedeemRequest;
+import com.example.loyaltyapp.network.contract.CancelRedeemResult;
+import com.example.loyaltyapp.network.contract.EarnRequest;
+import com.example.loyaltyapp.network.contract.EarnResult;
+import com.example.loyaltyapp.network.contract.RedeemRequest;
+import com.example.loyaltyapp.network.contract.RedeemResult;
+import com.example.loyaltyapp.network.contract.RegisterDeviceRequest;
+import com.example.loyaltyapp.network.contract.RegisterDeviceResult;
 
 import java.util.Map;
 
@@ -21,7 +30,8 @@ import retrofit2.http.POST;
  * action and reuse it on retries (see {@link IdempotencyKey}); the auth token
  * is attached transparently by the OkHttp interceptor. Responses come wrapped
  * in {@link ApiResponse}; turn a failed call into a message with
- * {@code ApiErrors.from(response)}.
+ * {@code ApiErrors.from(response)}. Request/response bodies live as top-level
+ * types in {@code com.example.loyaltyapp.network.contract}.
  *
  * <p>{@code registerDevice} deliberately takes no idempotency key (it is an
  * idempotent upsert on the backend side).
@@ -59,75 +69,6 @@ public interface ApiService {
     @POST("push/registerDevice")
     Call<ApiResponse<RegisterDeviceResult>> registerDevice(
             @Body RegisterDeviceRequest body);
-
-    // ---------------------------------------------------------------------
-    // Request bodies
-    // ---------------------------------------------------------------------
-
-    class EarnRequest {
-        public final String code;
-        public EarnRequest(String code) { this.code = code; }
-    }
-
-    class RedeemRequest {
-        public final String rewardId;
-        public RedeemRequest(String rewardId) { this.rewardId = rewardId; }
-    }
-
-    class CancelRedeemRequest {
-        public final String code;
-        public CancelRedeemRequest(String code) { this.code = code; }
-    }
-
-    class RegisterDeviceRequest {
-        public final String deviceId;
-        public final String fcmToken;
-        public final String platform;
-        public RegisterDeviceRequest(String deviceId, String fcmToken, String platform) {
-            this.deviceId = deviceId;
-            this.fcmToken = fcmToken;
-            this.platform = platform;
-        }
-    }
-
-    // ---------------------------------------------------------------------
-    // Response payloads (the `data` inside ApiResponse)
-    // ---------------------------------------------------------------------
-
-    class EarnResult {
-        public int pointsGranted;
-        public int totalPoints;
-        public int totalVisits;
-    }
-
-    class RedeemResult {
-        public String code;
-        public String rewardId;
-        public int cost;
-        public int totalPoints;
-        public long expiresAtEpochMs;
-    }
-
-    class CancelRedeemResult {
-        public String code;
-        // Points returned to the balance by the cancel. Confirm shape with backend
-        // (points refunded vs. boolean flag) before wiring the redeem cancel UI.
-        public int refunded;
-        public int totalPoints;
-    }
-
-    class BirthdayResult {
-        public int pointsGranted;
-        public int totalPoints;
-        public int year;
-    }
-
-    class RegisterDeviceResult {
-        public String deviceId;
-        // Backend timestamp of last check-in. Typed as epoch millis; confirm the
-        // backend doesn't send an ISO-8601 string before relying on this field.
-        public long lastSeenAt;
-    }
 
     // ---------------------------------------------------------------------
     // Legacy — old email/verify backend. Still used by SignUpActivity and
