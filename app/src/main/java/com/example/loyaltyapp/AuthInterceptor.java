@@ -31,8 +31,14 @@ final class AuthInterceptor implements Interceptor {
         Response response = chain.proceed(withBearer(original, idToken(false)));
 
         if (response.code() == 401) {
-            response.close();
-            response = chain.proceed(withBearer(original, idToken(true)));
+            // Only retry if we can actually get a fresh token. idToken(true)
+            // returns null when signed-out or the refresh fails — retrying then
+            // just fires a second unauthenticated call that 401s again.
+            String fresh = idToken(true);
+            if (fresh != null) {
+                response.close();
+                response = chain.proceed(withBearer(original, fresh));
+            }
         }
         return response;
     }
