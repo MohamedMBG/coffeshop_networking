@@ -98,7 +98,9 @@ public class ScanViewModel extends ViewModel {
         repository.earn(code, new ScanRepository.EarnCallback() {
             @Override
             public void onSuccess(int pointsGranted, int totalPoints, int totalVisits) {
-                postSuccess("+" + pointsGranted + " Points", "Points added!");
+                // Backend returns no "visit counted" flag, so surface the new
+                // balance instead of the old same-visit/new-visit sub-message.
+                postSuccess("+" + pointsGranted + " Points", "Balance: " + totalPoints + " pts");
             }
 
             @Override

@@ -1,5 +1,9 @@
 package com.example.loyaltyapp.data.repository;
 
+import android.util.Log;
+
+import androidx.annotation.VisibleForTesting;
+
 import com.example.loyaltyapp.ApiClient;
 import com.example.loyaltyapp.ApiErrors;
 import com.example.loyaltyapp.ApiResponse;
@@ -20,8 +24,22 @@ import java.util.Map;
 import retrofit2.Call;
 
 public class ScanRepository {
+    private static final String TAG = "ScanRepository";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final long VISIT_TIME_WINDOW_MILLIS = 4 * 60 * 60 * 1000;
+
+    // Injected once so the Retrofit proxy isn't rebuilt per call and can be
+    // swapped in tests.
+    private final ApiService api;
+
+    public ScanRepository() {
+        this(ApiClient.getClient().create(ApiService.class));
+    }
+
+    @VisibleForTesting
+    public ScanRepository(ApiService api) {
+        this.api = api;
+    }
 
     public interface EarnCallback {
         void onSuccess(int pointsGranted, int totalPoints, int totalVisits);
@@ -34,7 +52,6 @@ public class ScanRepository {
      * Success/error are reported on the main thread via {@code cb}.
      */
     public void earn(String code, EarnCallback cb) {
-        ApiService api = ApiClient.getClient().create(ApiService.class);
         // One idempotency key per scan; the auth interceptor's 401-retry replays
         // the same key, so a retry never double-earns.
         api.earn(Idempotency.newKey() , new ApiService.EarnRequest(code))
@@ -53,9 +70,10 @@ public class ScanRepository {
 
                     @Override
                     public void onFailure(Call<ApiResponse<ApiService.EarnResult>> call, Throwable throwable) {
-                        // Transport-level failure (no HTTP response): show a stable,
-                        // user-friendly message rather than a raw exception string.
-                        cb.onError("Network error. Check your connection.");
+                        // Transport-level failure (no HTTP response). Log the cause
+                        // for debugging; the user-facing copy lives in ApiErrors.
+                        Log.e(TAG, "earn transport failure", throwable);
+                        cb.onError(ApiErrors.networkMessageFor(throwable));
                     }
                 });
     }

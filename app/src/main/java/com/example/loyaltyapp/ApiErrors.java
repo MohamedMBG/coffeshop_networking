@@ -25,6 +25,21 @@ public final class ApiErrors {
         }
     }
 
+    /**
+     * User-facing message for a transport-level failure (no HTTP response, e.g.
+     * no connectivity or a timeout). Keeps network copy in the message layer
+     * rather than hard-coded in repositories.
+     */
+    public static String networkMessageFor(Throwable t) {
+        if (t instanceof java.net.UnknownHostException) {
+            return "No internet connection. Check your network and try again.";
+        }
+        if (t instanceof java.net.SocketTimeoutException) {
+            return "Network timeout. Please try again.";
+        }
+        return "Network error. Please try again.";
+    }
+
     /** Convenience: parse the response and return the user-facing message for its code. */
     public static String messageFor(Response<?> response) {
         ApiError err = parse(response);

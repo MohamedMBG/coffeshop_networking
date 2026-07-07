@@ -98,6 +98,7 @@ public class ScanViewModelTest {
         assertNotNull(state);
         assertTrue(state.isSuccess);
         assertEquals("+10 Points", state.successMain);
+        assertEquals("Balance: 110 pts", state.successSub);
     }
 
     @Test
