@@ -8,6 +8,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -24,6 +27,10 @@ import okhttp3.Response;
  * just granted — the token is force-refreshed once and the request replayed.
  */
 public final class AuthInterceptor implements Interceptor {
+
+    // Bound the token wait so a stuck token task can't hang an OkHttp
+    // dispatcher thread indefinitely.
+    private static final long TOKEN_TIMEOUT_SECONDS = 10;
 
     @Nullable
     private final FirebaseAuth injectedAuth;
@@ -67,10 +74,16 @@ public final class AuthInterceptor implements Interceptor {
         // One force-refresh retry on 401. Covers an expired cached token and
         // the "role just granted, old token lacks the claim" case.
         if (response.code() == 401) {
-            String refreshed = fetchToken(user, true);
-            if (refreshed != null && !refreshed.equals(token)) {
-                response.close();
-                response = chain.proceed(withBearer(original, refreshed));
+            // Re-read the current user: sign-out or an account switch between
+            // the first request and the 401 would make the captured `user`
+            // stale, and we must not retry with the wrong account's token.
+            FirebaseUser current = auth().getCurrentUser();
+            if (current != null) {
+                String refreshed = fetchToken(current, true);
+                if (refreshed != null && !refreshed.equals(token)) {
+                    response.close();
+                    response = chain.proceed(withBearer(original, refreshed));
+                }
             }
         }
 
@@ -83,15 +96,22 @@ public final class AuthInterceptor implements Interceptor {
                 .build();
     }
 
-    /** Blocking token fetch. Returns {@code null} if the token can't be obtained. */
+    /**
+     * Blocking, time-bounded token fetch. Returns {@code null} if the token
+     * can't be obtained (failure, timeout, or interruption). Never logs — the
+     * token is a credential.
+     */
     @Nullable
     private static String fetchToken(FirebaseUser user, boolean forceRefresh) {
         try {
-            GetTokenResult result = Tasks.await(user.getIdToken(forceRefresh));
+            GetTokenResult result = Tasks.await(
+                    user.getIdToken(forceRefresh), TOKEN_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             return result != null ? result.getToken() : null;
-        } catch (Exception e) {
-            // ExecutionException / InterruptedException — treat as "no token".
-            // Do not log: the token itself is a credential.
+        } catch (InterruptedException e) {
+            // Preserve the interrupt so upstream cancellation still works.
+            Thread.currentThread().interrupt();
+            return null;
+        } catch (ExecutionException | TimeoutException e) {
             return null;
         }
     }
