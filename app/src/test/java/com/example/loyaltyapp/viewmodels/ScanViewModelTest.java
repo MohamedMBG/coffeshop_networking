@@ -3,9 +3,11 @@ package com.example.loyaltyapp.viewmodels;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,9 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(manifest=Config.NONE)
@@ -80,21 +79,44 @@ public class ScanViewModelTest {
     }
 
     @Test
-    public void testProcessScannedCode_ValidEarnCode_CallsExecuteEarn() {
-        // Arrange
-        String code = "validEarnVoucherId123";
-        // Create a mocked task for repository
-        Map<String, Object> fakeResult = new HashMap<>();
-        fakeResult.put("points", 10);
-        fakeResult.put("visitCounted", true);
-        Task<Map<String, Object>> mockTask = Tasks.forResult(fakeResult);
-        when(mockRepository.executeEarnTransaction(eq(code), eq("user123"))).thenReturn(mockTask);
+    public void testProcessScannedCode_ValidEarnCode_CallsEarnAndShowsPoints() {
+        // Arrange: bare earn code goes to the backend via repository.earn(...).
+        // Stub the callback to fire success so we can assert the resulting state.
+        String code = "ABCDEFGH23";
+        doAnswer(inv -> {
+            ScanRepository.EarnCallback cb = inv.getArgument(1);
+            cb.onSuccess(10, 110, 5);
+            return null;
+        }).when(mockRepository).earn(eq(code), any(ScanRepository.EarnCallback.class));
 
         // Act
         viewModel.processScannedCode(code);
 
         // Assert
-        verify(mockRepository).executeEarnTransaction(eq(code), eq("user123"));
+        verify(mockRepository).earn(eq(code), any(ScanRepository.EarnCallback.class));
+        ScanViewModel.ScanState state = viewModel.getScanState().getValue();
+        assertNotNull(state);
+        assertTrue(state.isSuccess);
+        assertEquals("+10 Points", state.successMain);
+    }
+
+    @Test
+    public void testProcessScannedCode_EarnError_PostsError() {
+        // Arrange: backend rejects the code; repository reports a mapped message.
+        String code = "ABCDEFGH23";
+        doAnswer(inv -> {
+            ScanRepository.EarnCallback cb = inv.getArgument(1);
+            cb.onError("This code has expired.");
+            return null;
+        }).when(mockRepository).earn(eq(code), any(ScanRepository.EarnCallback.class));
+
+        // Act
+        viewModel.processScannedCode(code);
+
+        // Assert
+        ScanViewModel.ScanState state = viewModel.getScanState().getValue();
+        assertNotNull(state);
+        assertEquals("This code has expired.", state.errorMsg);
     }
 
     @Test
