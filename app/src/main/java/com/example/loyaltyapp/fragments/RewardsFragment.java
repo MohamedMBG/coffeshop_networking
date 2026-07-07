@@ -112,15 +112,16 @@ public class RewardsFragment extends Fragment {
         });
 
         viewModel.getRedemptionState().observe(getViewLifecycleOwner(), state -> {
-            if (state == null) return;
-            if (state.isFinished) {
-                if (state.isSuccess) {
-                    Toast.makeText(requireContext(), "Reward Redeemed Successfully!", Toast.LENGTH_SHORT).show();
-                } else if (state.error != null) {
-                    Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
-                }
-                viewModel.resetRedemptionState();
+            if (state == null || !state.isFinished) return;
+            if (state.isSuccess && state.code != null) {
+                // Backend deducted the points and issued a pending code; show it
+                // as a QR for the cashier to scan.
+                com.example.loyaltyapp.RedeemCodeDialog.show(
+                        requireContext(), state.code, state.expiresAtEpochMs);
+            } else if (state.error != null) {
+                Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
             }
+            viewModel.resetRedemptionState();
         });
         
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
@@ -165,21 +166,15 @@ public class RewardsFragment extends Fragment {
         return (s == null) ? "" : s;
     }
 
-    // Redemption is intentionally disabled until backend issues a redeem
-    // code and confirms it at the cashier. Do NOT call viewModel.redeemReward
-    // from the client — Firestore rules block client-side points mutation
-    // and any deduction here would only succeed against an unsecured DB.
+    // Redeem through the backend: it deducts the points and returns a pending
+    // code shown as a QR (see the redemptionState observer). The cashier scans
+    // that code to complete the spend — the client never mutates points.
     private void onRedeemClicked(@NonNull Rewards r) {
         if (userPoints < r.redeemPoints) {
             Toast.makeText(requireContext(), "Not enough points yet", Toast.LENGTH_SHORT).show();
             return;
         }
-        Snackbar.make(requireView(),
-                "Redemption coming soon. Your points are safe.",
-                Snackbar.LENGTH_LONG)
-                .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
-                .setAction("OK", v -> { })
-                .show();
+        viewModel.redeemReward(r);
     }
 
         // showLoadError is no longer needed since errors are handled by observing getErrorMessage() in onViewCreated
