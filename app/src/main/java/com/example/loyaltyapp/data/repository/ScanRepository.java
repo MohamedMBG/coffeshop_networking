@@ -1,5 +1,10 @@
 package com.example.loyaltyapp.data.repository;
 
+import com.example.loyaltyapp.ApiClient;
+import com.example.loyaltyapp.ApiErrors;
+import com.example.loyaltyapp.ApiResponse;
+import com.example.loyaltyapp.ApiService;
+import com.example.loyaltyapp.Idempotency;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
@@ -12,97 +17,47 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import retrofit2.Call;
+
 public class ScanRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final long VISIT_TIME_WINDOW_MILLIS = 4 * 60 * 60 * 1000;
 
-    public Task<Map<String, Object>> executeEarnTransaction(String voucherId, String userUid) {
-        final DocumentReference voucherRef = db.collection("earn_codes").document(voucherId);
-        final DocumentReference userRef = db.collection("users").document(userUid);
-        final DocumentReference activityRef = userRef.collection("activities").document();
+    public interface EarnCallback {
+        void onSuccess(int pointsGranted, int totalPoints, int totalVisits);
+        void onError(String message);
+    }
 
-        return db.runTransaction(transaction -> {
-            DocumentSnapshot voucherSnap = transaction.get(voucherRef);
-            DocumentSnapshot userSnap = transaction.get(userRef);
+    /**
+     * Redeem a scanned earn code through the backend (POST /loyalty/earn).
+     * The auth interceptor attaches the Firebase token, so no uid is passed.
+     * Success/error are reported on the main thread via {@code cb}.
+     */
+    public void earn(String code, EarnCallback cb) {
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        // One idempotency key per scan; the auth interceptor's 401-retry replays
+        // the same key, so a retry never double-earns.
+        api.earn(Idempotency.newKey() , new ApiService.EarnRequest(code))
+                .enqueue(new retrofit2.Callback<ApiResponse<ApiService.EarnResult>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<ApiResponse<ApiService.EarnResult>> call ,
+                                           retrofit2.Response<ApiResponse<ApiService.EarnResult>> resp){
+                        ApiResponse<ApiService.EarnResult> body = resp.body();
+                        if (resp.isSuccessful() && body != null && body.ok && body.data != null) {
+                            ApiService.EarnResult result = body.data;
+                            cb.onSuccess(result.pointsGranted , result.totalPoints , result.totalVisits);
+                        } else {
+                            cb.onError(ApiErrors.messageFor(resp));
+                        }
+                    }
 
-            if (!voucherSnap.exists()) {
-                throw new FirebaseFirestoreException("Voucher not found", FirebaseFirestoreException.Code.NOT_FOUND);
-            }
-
-            String status = voucherSnap.getString("status");
-            Long validForSec = voucherSnap.getLong("validForSec");
-            Timestamp createdAt = voucherSnap.getTimestamp("createdAt");
-            Long pointsLong = voucherSnap.getLong("points");
-            int pointsVal = pointsLong != null ? pointsLong.intValue() : 0;
-
-            if (status == null) {
-                throw new FirebaseFirestoreException("Invalid voucher", FirebaseFirestoreException.Code.DATA_LOSS);
-            }
-
-            if (!"pending".equalsIgnoreCase(status)) {
-                throw new FirebaseFirestoreException("Voucher is " + status, FirebaseFirestoreException.Code.ABORTED);
-            }
-
-            if (createdAt != null && validForSec != null) {
-                long ageMs = System.currentTimeMillis() - createdAt.toDate().getTime();
-                if (ageMs > validForSec * 1000L) {
-                    throw new FirebaseFirestoreException("Voucher expired", FirebaseFirestoreException.Code.ABORTED);
-                }
-            }
-
-            long currentPoints = userSnap.getLong("points") != null ? userSnap.getLong("points") : 0L;
-
-            long currentVisits = userSnap.getLong("visits") != null ? userSnap.getLong("visits") : 0L;
-            Timestamp lastVisitTs = userSnap.getTimestamp("lastVisitTimestamp");
-
-            boolean incrementVisit = false;
-            Date now = new Date();
-            long nowMillis = now.getTime();
-
-            if (lastVisitTs == null) {
-                incrementVisit = true;
-            } else {
-                long lastVisitMillis = lastVisitTs.toDate().getTime();
-                long timeDifference = nowMillis - lastVisitMillis;
-                if (timeDifference > VISIT_TIME_WINDOW_MILLIS) {
-                    incrementVisit = true;
-                } else {
-                    incrementVisit = false;
-                }
-            }
-
-            Map<String, Object> vUpd = new HashMap<>();
-            vUpd.put("status", "redeemed");
-            vUpd.put("redeemedAt", new Timestamp(now));
-            vUpd.put("redeemedByUid", userUid);
-            transaction.update(voucherRef, vUpd);
-
-            Map<String, Object> uUpd = new HashMap<>();
-            uUpd.put("points", currentPoints + pointsVal);
-            uUpd.put("updatedAt", new Timestamp(now));
-
-            if (incrementVisit) {
-                uUpd.put("visits", currentVisits + 1);
-                uUpd.put("lastVisitTimestamp", new Timestamp(now));
-            }
-
-            transaction.update(userRef, uUpd);
-
-            // P1: normalized activity log schema. See ActivityEvent javadoc.
-            // Fields: type / delta / desc / refId / ts (status omitted for earn).
-            Map<String, Object> log = new HashMap<>();
-            log.put("type", "earn");
-            log.put("delta", pointsVal);
-            log.put("desc", "");
-            log.put("refId", voucherId);
-            log.put("ts", new Timestamp(now));
-            transaction.set(activityRef, log);
-
-            Map<String, Object> result = new HashMap<>();
-            result.put("points", pointsVal);
-            result.put("visitCounted", incrementVisit);
-            return result;
-        });
+                    @Override
+                    public void onFailure(Call<ApiResponse<ApiService.EarnResult>> call, Throwable throwable) {
+                        // Transport-level failure (no HTTP response): show a stable,
+                        // user-friendly message rather than a raw exception string.
+                        cb.onError("Network error. Check your connection.");
+                    }
+                });
     }
 
     public Task<String> executeSpendTransaction(String redeemDocId, String qrUserUid, int qrCostPoints, String currentUserUid) {
