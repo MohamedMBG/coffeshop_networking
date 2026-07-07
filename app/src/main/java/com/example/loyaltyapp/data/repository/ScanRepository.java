@@ -23,15 +23,20 @@ public class ScanRepository {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static final long VISIT_TIME_WINDOW_MILLIS = 4 * 60 * 60 * 1000;
 
-    public interface EarnCallback{
+    public interface EarnCallback {
         void onSuccess(int pointsGranted, int totalPoints, int totalVisits);
-        void onError(String messgage);
+        void onError(String message);
     }
 
-    public void earn(String code, EarnCallback cb){
+    /**
+     * Redeem a scanned earn code through the backend (POST /loyalty/earn).
+     * The auth interceptor attaches the Firebase token, so no uid is passed.
+     * Success/error are reported on the main thread via {@code cb}.
+     */
+    public void earn(String code, EarnCallback cb) {
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        //One idempotency key per scan; the auth interceptor's 401-retry replays
-        // the same key, s a retry never double-earns
+        // One idempotency key per scan; the auth interceptor's 401-retry replays
+        // the same key, so a retry never double-earns.
         api.earn(Idempotency.newKey() , new ApiService.EarnRequest(code))
                 .enqueue(new retrofit2.Callback<ApiResponse<ApiService.EarnResult>>() {
                     @Override
@@ -48,7 +53,9 @@ public class ScanRepository {
 
                     @Override
                     public void onFailure(Call<ApiResponse<ApiService.EarnResult>> call, Throwable throwable) {
-                        cb.onError(throwable.getMessage());
+                        // Transport-level failure (no HTTP response): show a stable,
+                        // user-friendly message rather than a raw exception string.
+                        cb.onError("Network error. Check your connection.");
                     }
                 });
     }
