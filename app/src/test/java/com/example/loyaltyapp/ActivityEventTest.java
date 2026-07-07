@@ -114,6 +114,18 @@ public class ActivityEventTest {
         assertEquals(ActivityEvent.TYPE_REDEEM, event.type);
     }
 
+    /** Unknown/unmapped type is passed through unchanged (not lowercased). */
+    @Test
+    public void testFromDoc_UnknownTypePassthrough() {
+        when(mockDocumentSnapshot.getId()).thenReturn("doc_x");
+        when(mockDocumentSnapshot.getString("type")).thenReturn("SomeFutureType");
+
+        ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
+
+        assertNotNull(event);
+        assertEquals("SomeFutureType", event.type);
+    }
+
     /** All fields null. Confirms defaults prevent NPEs in adapters. */
     @Test
     public void testFromDocWithNullFields() {

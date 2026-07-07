@@ -83,7 +83,7 @@ public class ActivityEvent {
             case "spend":      return TYPE_REDEEM;
             case "redemption": return TYPE_REDEEM;
             case "bonus":      return TYPE_ADJUST;
-            default:           return raw.toLowerCase();
+            default:           return raw; // unknown type: pass through unchanged
         }
     }
 

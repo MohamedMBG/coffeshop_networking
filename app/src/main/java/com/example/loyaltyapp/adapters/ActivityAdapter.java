@@ -47,7 +47,7 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
             case ActivityEvent.TYPE_REDEEM:   title = "Redemption" + suffix; break;
             case ActivityEvent.TYPE_CANCEL:   title = "Refund" + suffix; break;
             case ActivityEvent.TYPE_EXPIRE:   title = "Expired" + suffix; break;
-            case ActivityEvent.TYPE_BIRTHDAY: title = "Birthday reward"; break;
+            case ActivityEvent.TYPE_BIRTHDAY: title = "Birthday reward" + suffix; break;
             case ActivityEvent.TYPE_ADJUST:   title = e.desc != null && !e.desc.isEmpty() ? e.desc : "Adjustment"; break;
             default:                          title = "Activity"; break;
         }

@@ -105,10 +105,15 @@ public class RewardsRepository {
         Rewards r = new Rewards();
         r.id = d.getId();
         r.name = name;
-        r.imagePath = d.getString(F_IMAGE) != null ? d.getString(F_IMAGE) : "";
+        // Prefer backend field, fall back to the legacy name so pre-migration
+        // catalog documents still parse.
+        String img = d.getString(F_IMAGE);
+        if (img == null) img = d.getString("imagePath");
+        r.imagePath = img != null ? img : "";
         r.category = d.getString(F_CATEGORY) != null ? d.getString(F_CATEGORY) : "";
-        long p = d.getLong(F_POINTS) != null ? d.getLong(F_POINTS) : 0;
-        r.redeemPoints = (int) p;
+        Long pts = d.getLong(F_POINTS);
+        if (pts == null) pts = d.getLong("redeemPoints");
+        r.redeemPoints = pts != null ? pts.intValue() : 0;
         long e = d.getLong(F_EXP_DAYS) != null ? d.getLong(F_EXP_DAYS) : 30;
         return r;
     }
