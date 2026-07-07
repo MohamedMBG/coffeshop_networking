@@ -17,9 +17,9 @@ import org.mockito.MockitoAnnotations;
 import java.util.Date;
 
 /**
- * Validates the normalized ActivityEvent.fromDoc parsing, including the
- * legacy-field fallback path so that documents written under the old schema
- * (`points`, `storeName`, `voucherId`, etc.) still bind correctly.
+ * Validates ActivityEvent.fromDoc parsing against the canonical backend schema
+ * (pointsDelta / createdAt / refId / balanceAfter) and the legacy-field
+ * fallback path so documents written under the old app schema still bind.
  */
 public class ActivityEventTest {
 
@@ -33,19 +33,18 @@ public class ActivityEventTest {
         mocks = MockitoAnnotations.openMocks(this);
     }
 
-    /**
-     * Document uses the normalized schema. Verifies straight-through binding.
-     */
+    /** Document uses the canonical backend schema. */
     @Test
-    public void testFromDocSuccess_NormalizedSchema() {
+    public void testFromDocSuccess_BackendSchema() {
         Timestamp testTimestamp = new Timestamp(new Date());
 
         when(mockDocumentSnapshot.getId()).thenReturn("doc_123");
         when(mockDocumentSnapshot.getString("type")).thenReturn(ActivityEvent.TYPE_EARN);
-        when(mockDocumentSnapshot.getLong("delta")).thenReturn(25L);
+        when(mockDocumentSnapshot.getLong("pointsDelta")).thenReturn(25L);
         when(mockDocumentSnapshot.getString("desc")).thenReturn("Coffee Shop");
         when(mockDocumentSnapshot.getString("refId")).thenReturn("voucher_abc");
-        when(mockDocumentSnapshot.getTimestamp("ts")).thenReturn(testTimestamp);
+        when(mockDocumentSnapshot.get("createdAt")).thenReturn(testTimestamp);
+        when(mockDocumentSnapshot.getLong("balanceAfter")).thenReturn(120L);
 
         ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
 
@@ -56,12 +55,27 @@ public class ActivityEventTest {
         assertEquals("Coffee Shop", event.desc);
         assertEquals("voucher_abc", event.refId);
         assertEquals(testTimestamp, event.ts);
+        assertEquals(120, event.balanceAfter);
+    }
+
+    /** createdAt stored as epoch millis (Number) instead of a Timestamp. */
+    @Test
+    public void testFromDoc_CreatedAtEpochMillis() {
+        long epochMs = 1_700_000_000_000L;
+        when(mockDocumentSnapshot.getId()).thenReturn("doc_epoch");
+        when(mockDocumentSnapshot.getString("type")).thenReturn(ActivityEvent.TYPE_REDEEM);
+        when(mockDocumentSnapshot.get("createdAt")).thenReturn(epochMs);
+
+        ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
+
+        assertNotNull(event);
+        assertNotNull(event.ts);
+        assertEquals(epochMs, event.ts.toDate().getTime());
     }
 
     /**
-     * Document uses the legacy schema (type=scan, points, storeName, voucherId).
-     * Verifies that fromDoc translates each legacy field to its canonical name
-     * and that the "scan" alias normalizes to TYPE_EARN.
+     * Legacy document (type=scan, points, storeName, voucherId, ts). Verifies
+     * fallback to old field names and the "scan" -> earn alias.
      */
     @Test
     public void testFromDocSuccess_LegacyFallback() {
@@ -69,13 +83,14 @@ public class ActivityEventTest {
 
         when(mockDocumentSnapshot.getId()).thenReturn("legacy_1");
         when(mockDocumentSnapshot.getString("type")).thenReturn("scan");
+        // Missing backend fields: real DocumentSnapshot returns null here (the
+        // mock defaults to 0L, so stub explicitly) to exercise the fallback.
+        when(mockDocumentSnapshot.getLong("pointsDelta")).thenReturn(null);
         when(mockDocumentSnapshot.getLong("delta")).thenReturn(null);
         when(mockDocumentSnapshot.getLong("points")).thenReturn(15L);
-        when(mockDocumentSnapshot.getString("desc")).thenReturn(null);
         when(mockDocumentSnapshot.getString("storeName")).thenReturn("Cafe");
-        when(mockDocumentSnapshot.getString("refId")).thenReturn(null);
         when(mockDocumentSnapshot.getString("voucherId")).thenReturn("v1");
-        when(mockDocumentSnapshot.getTimestamp("ts")).thenReturn(testTimestamp);
+        when(mockDocumentSnapshot.get("ts")).thenReturn(testTimestamp);
 
         ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
 
@@ -84,11 +99,34 @@ public class ActivityEventTest {
         assertEquals(15, event.delta);
         assertEquals("Cafe", event.desc);
         assertEquals("v1", event.refId);
+        assertEquals(testTimestamp, event.ts);
     }
 
-    /**
-     * All fields null. Confirms default values prevent NPE in adapters.
-     */
+    /** Legacy "spend" alias maps onto the canonical redeem type. */
+    @Test
+    public void testFromDoc_LegacySpendMapsToRedeem() {
+        when(mockDocumentSnapshot.getId()).thenReturn("legacy_2");
+        when(mockDocumentSnapshot.getString("type")).thenReturn("spend");
+
+        ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
+
+        assertNotNull(event);
+        assertEquals(ActivityEvent.TYPE_REDEEM, event.type);
+    }
+
+    /** Unknown/unmapped type is passed through unchanged (not lowercased). */
+    @Test
+    public void testFromDoc_UnknownTypePassthrough() {
+        when(mockDocumentSnapshot.getId()).thenReturn("doc_x");
+        when(mockDocumentSnapshot.getString("type")).thenReturn("SomeFutureType");
+
+        ActivityEvent event = ActivityEvent.fromDoc(mockDocumentSnapshot);
+
+        assertNotNull(event);
+        assertEquals("SomeFutureType", event.type);
+    }
+
+    /** All fields null. Confirms defaults prevent NPEs in adapters. */
     @Test
     public void testFromDocWithNullFields() {
         when(mockDocumentSnapshot.getId()).thenReturn("doc_nulls");
@@ -101,13 +139,11 @@ public class ActivityEventTest {
         assertEquals(0, event.delta);
         assertEquals("", event.desc);
         assertEquals("", event.refId);
+        assertEquals(0, event.balanceAfter);
         assertNull(event.ts);
     }
 
-    /**
-     * fromDoc swallows exceptions and returns null rather than crashing the
-     * caller.
-     */
+    /** fromDoc swallows exceptions and returns null rather than crashing. */
     @Test
     public void testFromDocExceptionHandling() {
         when(mockDocumentSnapshot.getId()).thenThrow(new RuntimeException("boom"));
