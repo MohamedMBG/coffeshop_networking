@@ -33,9 +33,9 @@ public class RewardsRepository {
     // Firestore Fields
     private static final String F_ACTIVE = "active";
     private static final String F_CATEGORY = "category";
-    private static final String F_POINTS = "redeemPoints";
+    private static final String F_POINTS = "cost";
     private static final String F_NAME = "name";
-    private static final String F_IMAGE = "imagePath";
+    private static final String F_IMAGE = "imageUrl";
     private static final String F_DESC = "description";
     private static final String F_TERMS = "termsUrl";
     private static final String F_EXP_DAYS = "expirationDays";

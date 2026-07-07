@@ -35,22 +35,21 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
     public void onBindViewHolder(@NonNull VH h, int pos) {
         ActivityEvent e = data.get(pos);
 
-        // P1: bind against the normalized schema (type/delta/desc/refId).
-        // ActivityEvent.fromDoc already translates legacy aliases ("scan",
-        // "redeem") into the canonical type values, so we no longer need
-        // string-OR branches per type here.
+        // P1: bind against the canonical backend schema (type/delta/desc/refId).
+        // ActivityEvent.fromDoc translates legacy aliases into the canonical type
+        // values (earn|redeem|cancel|expire|birthday|adjust), so we branch on
+        // those directly here.
 
+        String suffix = e.desc != null && !e.desc.isEmpty() ? " — " + e.desc : "";
         String title;
-        if (ActivityEvent.TYPE_EARN.equals(e.type)) {
-            title = "Scan" + (e.desc != null && !e.desc.isEmpty() ? " — " + e.desc : "");
-        } else if (ActivityEvent.TYPE_REDEMPTION.equals(e.type)) {
-            title = "Redemption" + (e.desc != null && !e.desc.isEmpty() ? " — " + e.desc : "");
-        } else if (ActivityEvent.TYPE_SPEND.equals(e.type)) {
-            title = e.desc != null && !e.desc.isEmpty() ? e.desc : "Spend";
-        } else if (ActivityEvent.TYPE_BONUS.equals(e.type)) {
-            title = "Bonus";
-        } else {
-            title = "Activity";
+        switch (e.type) {
+            case ActivityEvent.TYPE_EARN:     title = "Scan" + suffix; break;
+            case ActivityEvent.TYPE_REDEEM:   title = "Redemption" + suffix; break;
+            case ActivityEvent.TYPE_CANCEL:   title = "Refund" + suffix; break;
+            case ActivityEvent.TYPE_EXPIRE:   title = "Expired" + suffix; break;
+            case ActivityEvent.TYPE_BIRTHDAY: title = "Birthday reward"; break;
+            case ActivityEvent.TYPE_ADJUST:   title = e.desc != null && !e.desc.isEmpty() ? e.desc : "Adjustment"; break;
+            default:                          title = "Activity"; break;
         }
         h.activityTitle.setText(title);
 
@@ -65,23 +64,29 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
         String sign = displayPts > 0 ? "+" : "";
         h.activityPoints.setText(sign + displayPts);
 
-        if (ActivityEvent.TYPE_EARN.equals(e.type)) {
-            h.activityIcon.setImageResource(R.drawable.ic_scan);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
-            h.activityPoints.setTextColor(0xFF4CAF50);
-        } else if (ActivityEvent.TYPE_REDEMPTION.equals(e.type)
-                || ActivityEvent.TYPE_SPEND.equals(e.type)) {
-            h.activityIcon.setImageResource(R.drawable.ic_gift);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend);
-            h.activityPoints.setTextColor(0xFFD32F2F);
-        } else if (ActivityEvent.TYPE_BONUS.equals(e.type)) {
-            h.activityIcon.setImageResource(R.drawable.ic_star);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
-            h.activityPoints.setTextColor(0xFFFFC107);
-        } else {
-            h.activityIcon.setImageResource(R.drawable.ic_star);
-            h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
-            h.activityPoints.setTextColor(0xFFFFC107);
+        switch (e.type) {
+            case ActivityEvent.TYPE_EARN:
+                h.activityIcon.setImageResource(R.drawable.ic_scan);
+                h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
+                h.activityPoints.setTextColor(0xFF4CAF50);
+                break;
+            case ActivityEvent.TYPE_REDEEM:
+            case ActivityEvent.TYPE_EXPIRE:
+                h.activityIcon.setImageResource(R.drawable.ic_gift);
+                h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend);
+                h.activityPoints.setTextColor(0xFFD32F2F);
+                break;
+            case ActivityEvent.TYPE_CANCEL:
+                // Refund: points come back, show as a credit.
+                h.activityIcon.setImageResource(R.drawable.ic_gift);
+                h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
+                h.activityPoints.setTextColor(0xFF4CAF50);
+                break;
+            default: // birthday, adjust, unknown
+                h.activityIcon.setImageResource(R.drawable.ic_star);
+                h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
+                h.activityPoints.setTextColor(0xFFFFC107);
+                break;
         }
     }
 

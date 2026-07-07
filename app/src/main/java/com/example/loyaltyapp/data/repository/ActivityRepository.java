@@ -35,7 +35,7 @@ public class ActivityRepository {
     public void getActivityHistory(String uid, OnActivitiesLoaded callback) {
         db.collection("users").document(uid)
                 .collection("activities")
-                .orderBy("ts", Query.Direction.DESCENDING)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(200)
                 .get()
                 .addOnSuccessListener(snap -> {
