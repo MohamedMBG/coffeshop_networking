@@ -51,4 +51,28 @@
     <string name="punch_card_needed">%1$d more coffees until your next free one!</string>
     <string name="punch_card_reward_ready">Reward Ready!</string>
 
+    <!-- Backend error messages (mapped from ApiError codes) -->
+    <string name="err_earn_code_not_found">This code isn\'t valid. Please check and try again.</string>
+    <string name="err_earn_code_expired">This code has expired.</string>
+    <string name="err_earn_code_already_used">This code has already been used.</string>
+    <string name="err_earn_code_invalid_format">That doesn\'t look like a valid code.</string>
+    <string name="err_visit_cooldown">You\'ve just earned points. Please wait a little before scanning again.</string>
+    <string name="err_rate_limited">Too many requests. Please wait a moment and try again.</string>
+    <string name="err_insufficient_points">You don\'t have enough points for this reward.</string>
+    <string name="err_reward_inactive">This reward is no longer available.</string>
+    <string name="err_redeem_pending_limit">You already have a reward waiting to be used. Use or cancel it first.</string>
+    <string name="err_redeem_not_found">Reward code not found.</string>
+    <string name="err_redeem_not_pending">This reward code is no longer valid.</string>
+    <string name="err_birthday_not_set">Add your birthday to your profile to claim this reward.</string>
+    <string name="err_birthday_not_today">The birthday reward can only be claimed on your birthday.</string>
+    <string name="err_birthday_already_claimed">You\'ve already claimed your birthday reward this year.</string>
+
+    <!-- Generic fallbacks by HTTP status -->
+    <string name="err_unauthorized">Please sign in again.</string>
+    <string name="err_not_found">Not found.</string>
+    <string name="err_conflict">That action can\'t be completed right now.</string>
+    <string name="err_gone">This is no longer available.</string>
+    <string name="err_unprocessable">We couldn\'t process that request.</string>
+    <string name="err_generic">Something went wrong. Please try again.</string>
+
 </resources>
