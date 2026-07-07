@@ -78,28 +78,21 @@ public class ScanViewModel extends ViewModel {
         }
     }
 
-    private void executeEarnTransaction(String voucherId, String userUid) {
-        scanState.setValue(new ScanState(true, null, null, null, false));
-        repository.executeEarnTransaction(voucherId, userUid)
-            .addOnSuccessListener(result -> {
-                int points = (int) result.get("points");
-                boolean visitCounted = (boolean) result.get("visitCounted");
+    private void executeEarnTransaction(String code){
+        scanState.setValue(new ScanState(true , null , null , null , false));
+        repository.earn(code , new ScanRepository.EarnCallback() {
 
-                String mainMsg = "+" + points + " Points";
-                String subMsg = visitCounted ? "Visit counted & points added!" : "Points added (Same Visit)";
-                
-                postSuccess(mainMsg, subMsg);
-            })
-            .addOnFailureListener(e -> {
-                String msg = e.getMessage() != null ? e.getMessage() : "Transaction failed";
-                if (msg.contains("not found"))
-                    msg = "Invalid QR Code";
-                if (msg.toLowerCase().contains("expired"))
-                    msg = "This code has expired";
-                postError(msg);
-            });
+            @Override
+            public void onSuccess(int pointsGranted, int totalPoints, int totalVisits) {
+                postSuccess("+" + pointsGranted + " Points" , "Points added!");
+            }
+
+            @Override
+            public void onError(String messgage) {
+                postError(messgage);
+            }
+        });
     }
-
     private void executeSpendTransaction(String redeemDocId, String qrUserUid, int qrCostPoints, String currentUserUid) {
         scanState.setValue(new ScanState(true, null, null, null, false));
         repository.executeSpendTransaction(redeemDocId, qrUserUid, qrCostPoints, currentUserUid)
