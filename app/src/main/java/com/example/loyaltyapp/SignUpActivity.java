@@ -70,7 +70,7 @@ public class SignUpActivity extends AppCompatActivity {
             FirebaseMessaging.getInstance().getToken()
                     .addOnSuccessListener(t -> {
                         if (t != null && !t.isEmpty()) {
-                            TokenRegistrar.ensureDevice(t, "client");
+                            TokenRegistrar.ensureDevice(getApplicationContext(), t);
                         }
                     })
                     .addOnFailureListener(e -> Log.w("FCM", "existing user getToken failed"));
@@ -161,7 +161,7 @@ public class SignUpActivity extends AppCompatActivity {
                             FirebaseMessaging.getInstance().getToken()
                                     .addOnSuccessListener(fcmToken -> {
                                         if (fcmToken != null && !fcmToken.isEmpty()) {
-                                            TokenRegistrar.ensureDevice(fcmToken, "client");
+                                            TokenRegistrar.ensureDevice(getApplicationContext(), fcmToken);
                                         }
                                     })
                                     .addOnFailureListener(
