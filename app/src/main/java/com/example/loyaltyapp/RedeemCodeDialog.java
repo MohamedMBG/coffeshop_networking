@@ -31,6 +31,10 @@ public class RedeemCodeDialog extends DialogFragment {
     private static final String ARG_CODE = "code";
     private static final String ARG_EXPIRES = "expiresAtEpochMs";
 
+    /** FragmentResult key + payload for the "cancel reward" action. */
+    public static final String REQUEST_CANCEL = "redeem_cancel_request";
+    public static final String RESULT_CODE = "code";
+
     private CountDownTimer timer;
     private TextView countdownText;
 
@@ -73,6 +77,13 @@ public class RedeemCodeDialog extends DialogFragment {
         return new AlertDialog.Builder(requireContext())
                 .setView(view)
                 .setPositiveButton(R.string.redeem_done_button, null)
+                .setNegativeButton(R.string.redeem_cancel_button, (d, which) -> {
+                    // Hand the code back to the fragment, which owns the ViewModel
+                    // that performs the cancel/refund. Dialog then dismisses.
+                    Bundle result = new Bundle();
+                    result.putString(RESULT_CODE, code);
+                    getParentFragmentManager().setFragmentResult(REQUEST_CANCEL, result);
+                })
                 .create();
     }
 
