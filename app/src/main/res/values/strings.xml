@@ -51,4 +51,11 @@
     <string name="punch_card_needed">%1$d more coffees until your next free one!</string>
     <string name="punch_card_reward_ready">Reward Ready!</string>
 
+    <!-- Redeem code dialog -->
+    <string name="redeem_show_to_cashier">Show this to the cashier</string>
+    <string name="redeem_qr_content_description">Redeem QR code</string>
+    <string name="redeem_done_button">Done</string>
+    <string name="redeem_expires_format">Expires in %1$d:%2$02d</string>
+    <string name="redeem_expired">Expired</string>
+
 </resources>

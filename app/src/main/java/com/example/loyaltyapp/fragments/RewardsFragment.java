@@ -116,8 +116,9 @@ public class RewardsFragment extends Fragment {
             if (state.isSuccess && state.code != null) {
                 // Backend deducted the points and issued a pending code; show it
                 // as a QR for the cashier to scan.
-                com.example.loyaltyapp.RedeemCodeDialog.show(
-                        requireContext(), state.code, state.expiresAtEpochMs);
+                com.example.loyaltyapp.RedeemCodeDialog
+                        .newInstance(state.code, state.expiresAtEpochMs)
+                        .show(getParentFragmentManager(), "redeem_code");
             } else if (state.error != null) {
                 Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
             }
