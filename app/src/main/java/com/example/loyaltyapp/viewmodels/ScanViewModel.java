@@ -12,13 +12,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Drives the QR-scan screen. Decodes the scanned string, routes it to the right
- * economy action, and exposes a single {@link ScanState} the fragment observes.
- *
- * Two QR shapes are handled:
- *   - "REDEEM|codeId|uid|cost" — a redemption code (legacy in-app spend flow;
- *     replaced by the backend redeem/cashier flow in a later migration step).
- *   - anything else — a bare earn code, sent to the backend POST /loyalty/earn.
+ * Drives the QR-scan screen. The customer only scans earn codes: the scanned
+ * string is a bare earn code sent to the backend (POST /loyalty/earn). Redeem
+ * codes are shown by the customer and scanned by the cashier, so there is no
+ * redeem path here. Exposes a single {@link ScanState} the fragment observes.
  */
 public class ScanViewModel extends ViewModel {
 
@@ -55,37 +52,9 @@ public class ScanViewModel extends ViewModel {
             return;
         }
 
-        // Redemption codes carry structured data (id, owner uid, cost) in the
-        // QR itself; earn codes are just the bare code string.
-        if (rawData.startsWith("REDEEM|")) {
-            String[] parts = rawData.split("\\|");
-            if (parts.length < 4) {
-                postError("Invalid redemption QR format");
-                return;
-            }
-
-            String codeId = parts[1];
-            String qrUserUid = parts[2];
-            String costString = parts[3];
-
-            int qrCostPoints;
-            try {
-                qrCostPoints = Integer.parseInt(costString);
-            } catch (NumberFormatException e) {
-                postError("Invalid points in QR code");
-                return;
-            }
-
-            if (!currentUser.getUid().equals(qrUserUid)) {
-                postError("This code belongs to another account");
-                return;
-            }
-
-            executeSpendTransaction(codeId, qrUserUid, qrCostPoints, currentUser.getUid());
-        } else {
-            // Backend identifies the user from the auth token, so no uid is passed.
-            executeEarnTransaction(rawData);
-        }
+        // The scanned string is a bare earn code. Backend identifies the user
+        // from the auth token, so no uid is passed.
+        executeEarnTransaction(rawData);
     }
 
     /**
@@ -109,22 +78,6 @@ public class ScanViewModel extends ViewModel {
             }
         });
     }
-    // Legacy in-app spend: runs a direct Firestore transaction. Slated for
-    // removal once redeem/complete moves fully to the backend (migration Piece 2).
-    private void executeSpendTransaction(String redeemDocId, String qrUserUid, int qrCostPoints, String currentUserUid) {
-        scanState.setValue(new ScanState(true, null, null, null, false));
-        repository.executeSpendTransaction(redeemDocId, qrUserUid, qrCostPoints, currentUserUid)
-            .addOnSuccessListener(itemName -> {
-                postSuccess("Confirmed!", "Redeemed: " + itemName);
-            })
-            .addOnFailureListener(e -> {
-                String msg = e.getMessage() != null ? e.getMessage() : "Redemption failed";
-                if (msg.toLowerCase().contains("not found"))
-                    msg = "Invalid redeem code";
-                postError(msg);
-            });
-    }
-
     // Show the success state briefly, then auto-clear so the scanner is ready
     // for the next code. Any pending clear is cancelled first to avoid overlap.
     public void postSuccess(String main, String sub) {

@@ -107,20 +107,22 @@ public class RewardsViewModel extends ViewModel {
 
     public void redeemReward(Rewards reward) {
         isLoading.setValue(true);
-        redemptionState.setValue(new RedemptionState(false, null, false));
+        redemptionState.setValue(new RedemptionState(false, null, false, null, 0L));
 
-        rewardsRepo.submitRedemption(reward, new RewardsRepository.RedeemCallback() {
+        rewardsRepo.redeem(reward.id, new RewardsRepository.RedeemCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String code, long expiresAtEpochMs, int totalPoints) {
                 isLoading.postValue(false);
-                redemptionState.postValue(new RedemptionState(true, null, true));
+                // Carry the pending code + expiry so the fragment can show a QR
+                // with a countdown for the cashier to scan.
+                redemptionState.postValue(new RedemptionState(true, null, true, code, expiresAtEpochMs));
             }
 
             @Override
             public void onError(String message) {
                 isLoading.postValue(false);
                 errorMessage.postValue(message);
-                redemptionState.postValue(new RedemptionState(true, message, false));
+                redemptionState.postValue(new RedemptionState(true, message, false, null, 0L));
             }
         });
     }
@@ -149,11 +151,16 @@ public class RewardsViewModel extends ViewModel {
         public final boolean isFinished;
         public final String error;
         public final boolean isSuccess;
+        public final String code;             // pending redeem code (success only)
+        public final long expiresAtEpochMs;   // countdown target (success only)
 
-        public RedemptionState(boolean isFinished, String error, boolean isSuccess) {
+        public RedemptionState(boolean isFinished, String error, boolean isSuccess,
+                               String code, long expiresAtEpochMs) {
             this.isFinished = isFinished;
             this.error = error;
             this.isSuccess = isSuccess;
+            this.code = code;
+            this.expiresAtEpochMs = expiresAtEpochMs;
         }
     }
 }
