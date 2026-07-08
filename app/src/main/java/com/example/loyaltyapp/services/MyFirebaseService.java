@@ -16,7 +16,7 @@ import com.google.firebase.messaging.RemoteMessage;
 public class MyFirebaseService extends FirebaseMessagingService {
     @Override public void onNewToken(@NonNull String token) {
         // P0 security: do not log the token value. Forward to backend only.
-        TokenRegistrar.ensureDevice(token, "client");
+        TokenRegistrar.ensureDevice(this, token);
     }
 
 
