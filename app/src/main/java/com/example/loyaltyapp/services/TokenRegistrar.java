@@ -29,7 +29,13 @@ public final class TokenRegistrar {
 
     private TokenRegistrar() {}
 
-    /** Upsert this device on the backend whenever we have an FCM token. */
+    /**
+     * Upsert this device on the backend whenever we have an FCM token.
+     *
+     * @param ctx any Context; only the application context is retained (via
+     *            {@link Context#getApplicationContext()}), so passing a
+     *            short-lived Activity/Service context is leak-safe.
+     */
     public static void ensureDevice(Context ctx, String fcmToken) {
         if (fcmToken == null || fcmToken.isEmpty()) return;
         // No bearer when signed out -> backend would 401. Skip proving nothing.
@@ -51,7 +57,9 @@ public final class TokenRegistrar {
 
                     @Override
                     public void onFailure(Call<ApiResponse<ApiService.DeviceResult>> call, Throwable t) {
-                        Log.e(TAG, "registerDevice network error");
+                        // Log the cause for diagnosis. The FCM token lives in the
+                        // request body, not the throwable, so this stays P0-safe.
+                        Log.e(TAG, "registerDevice network error", t);
                     }
                 });
     }
