@@ -163,6 +163,12 @@ public class RewardsViewModel extends ViewModel {
         redemptionState.setValue(null);
     }
 
+    // Clear after the fragment toasts it so a config change (re-observe) does
+    // not re-fire the refund toast with a stale value.
+    public void resetCancelRefunded() {
+        cancelRefunded.setValue(null);
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

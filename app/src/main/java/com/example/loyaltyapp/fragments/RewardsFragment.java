@@ -147,6 +147,8 @@ public class RewardsFragment extends Fragment {
             if (refunded == null) return;
             Toast.makeText(requireContext(),
                     getString(R.string.redeem_cancelled_format, refunded), Toast.LENGTH_SHORT).show();
+            // One-time event: clear so rotation doesn't re-toast the stale value.
+            viewModel.resetCancelRefunded();
         });
     }
 
