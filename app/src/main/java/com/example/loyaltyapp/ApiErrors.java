@@ -31,11 +31,16 @@ public final class ApiErrors {
      * rather than hard-coded in repositories.
      */
     public static String networkMessageFor(Throwable t) {
-        if (t instanceof java.net.UnknownHostException) {
-            return "No internet connection. Check your network and try again.";
-        }
-        if (t instanceof java.net.SocketTimeoutException) {
-            return "Network timeout. Please try again.";
+        // Walk the cause chain: OkHttp/Retrofit often wrap the underlying
+        // socket exception. Bounded to avoid a pathological cyclic chain.
+        int depth = 0;
+        for (Throwable c = t; c != null && depth < 10; c = c.getCause(), depth++) {
+            if (c instanceof java.net.UnknownHostException) {
+                return "No internet connection. Check your network and try again.";
+            }
+            if (c instanceof java.net.SocketTimeoutException) {
+                return "Network timeout. Please try again.";
+            }
         }
         return "Network error. Please try again.";
     }

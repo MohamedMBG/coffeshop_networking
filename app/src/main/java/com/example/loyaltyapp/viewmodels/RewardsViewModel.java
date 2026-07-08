@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
+import com.example.loyaltyapp.Event;
 import com.example.loyaltyapp.data.repository.RewardsRepository;
 import com.example.loyaltyapp.data.repository.UserRepository;
 import com.example.loyaltyapp.models.Rewards;
@@ -20,9 +21,9 @@ public class RewardsViewModel extends ViewModel {
     private final MutableLiveData<List<Rewards>> rewardsList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private final MutableLiveData<RedemptionState> redemptionState = new MutableLiveData<>();
-    // Points refunded by a successful cancel; the fragment toasts it.
-    private final MutableLiveData<Integer> cancelRefunded = new MutableLiveData<>();
+    // One-time signals (Event) so a config change doesn't re-fire the dialog/toast.
+    private final MutableLiveData<Event<RedemptionState>> redemptionState = new MutableLiveData<>();
+    private final MutableLiveData<Event<Integer>> cancelRefunded = new MutableLiveData<>();
 
     // Listen to real-time points from UserRepository
     private final MutableLiveData<User> userData = new MutableLiveData<>();
@@ -75,11 +76,11 @@ public class RewardsViewModel extends ViewModel {
         return userPoints;
     }
 
-    public LiveData<RedemptionState> getRedemptionState() {
+    public LiveData<Event<RedemptionState>> getRedemptionState() {
         return redemptionState;
     }
 
-    public LiveData<Integer> getCancelRefunded() {
+    public LiveData<Event<Integer>> getCancelRefunded() {
         return cancelRefunded;
     }
 
@@ -113,7 +114,6 @@ public class RewardsViewModel extends ViewModel {
 
     public void redeemReward(Rewards reward) {
         isLoading.setValue(true);
-        redemptionState.setValue(new RedemptionState(false, null, false, null, 0L));
 
         rewardsRepo.redeem(reward.id, new RewardsRepository.RedeemCallback() {
             @Override
@@ -121,14 +121,16 @@ public class RewardsViewModel extends ViewModel {
                 isLoading.postValue(false);
                 // Carry the pending code + expiry so the fragment can show a QR
                 // with a countdown for the cashier to scan.
-                redemptionState.postValue(new RedemptionState(true, null, true, code, expiresAtEpochMs));
+                redemptionState.postValue(new Event<>(
+                        new RedemptionState(true, null, true, code, expiresAtEpochMs)));
             }
 
             @Override
             public void onError(String message) {
                 isLoading.postValue(false);
                 errorMessage.postValue(message);
-                redemptionState.postValue(new RedemptionState(true, message, false, null, 0L));
+                redemptionState.postValue(new Event<>(
+                        new RedemptionState(true, message, false, null, 0L)));
             }
         });
     }
@@ -142,7 +144,7 @@ public class RewardsViewModel extends ViewModel {
         rewardsRepo.cancelRedeem(code, new RewardsRepository.CancelCallback() {
             @Override
             public void onSuccess(int refunded, int totalPoints) {
-                cancelRefunded.postValue(refunded);
+                cancelRefunded.postValue(new Event<>(refunded));
             }
 
             @Override
@@ -157,16 +159,6 @@ public class RewardsViewModel extends ViewModel {
     // Let's create an init method.
     public void init(String uid) {
         userRepo.listenToUser(uid, userData);
-    }
-
-    public void resetRedemptionState() {
-        redemptionState.setValue(null);
-    }
-
-    // Clear after the fragment toasts it so a config change (re-observe) does
-    // not re-fire the refund toast with a stale value.
-    public void resetCancelRefunded() {
-        cancelRefunded.setValue(null);
     }
 
     @Override

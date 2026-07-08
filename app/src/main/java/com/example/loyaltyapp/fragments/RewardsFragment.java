@@ -111,8 +111,10 @@ public class RewardsFragment extends Fragment {
             if (adapter != null) adapter.notifyDataSetChanged();
         });
 
-        viewModel.getRedemptionState().observe(getViewLifecycleOwner(), state -> {
-            if (state == null || !state.isFinished) return;
+        viewModel.getRedemptionState().observe(getViewLifecycleOwner(), event -> {
+            RewardsViewModel.RedemptionState state =
+                    event == null ? null : event.getContentIfNotHandled();
+            if (state == null) return; // already handled or no event
             if (state.isSuccess && state.code != null) {
                 // Backend deducted the points and issued a pending code; show it
                 // as a QR for the cashier to scan.
@@ -122,7 +124,6 @@ public class RewardsFragment extends Fragment {
             } else if (state.error != null) {
                 Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
             }
-            viewModel.resetRedemptionState();
         });
         
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
@@ -143,12 +144,11 @@ public class RewardsFragment extends Fragment {
                     if (code != null) viewModel.cancelRedeem(code);
                 });
 
-        viewModel.getCancelRefunded().observe(getViewLifecycleOwner(), refunded -> {
-            if (refunded == null) return;
+        viewModel.getCancelRefunded().observe(getViewLifecycleOwner(), event -> {
+            Integer refunded = event == null ? null : event.getContentIfNotHandled();
+            if (refunded == null) return; // already handled or no event
             Toast.makeText(requireContext(),
                     getString(R.string.redeem_cancelled_format, refunded), Toast.LENGTH_SHORT).show();
-            // One-time event: clear so rotation doesn't re-toast the stale value.
-            viewModel.resetCancelRefunded();
         });
     }
 
