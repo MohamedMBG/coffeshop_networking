@@ -25,6 +25,26 @@ public final class ApiErrors {
         }
     }
 
+    /**
+     * User-facing message for a transport-level failure (no HTTP response, e.g.
+     * no connectivity or a timeout). Keeps network copy in the message layer
+     * rather than hard-coded in repositories.
+     */
+    public static String networkMessageFor(Throwable t) {
+        // Walk the cause chain: OkHttp/Retrofit often wrap the underlying
+        // socket exception. Bounded to avoid a pathological cyclic chain.
+        int depth = 0;
+        for (Throwable c = t; c != null && depth < 10; c = c.getCause(), depth++) {
+            if (c instanceof java.net.UnknownHostException) {
+                return "No internet connection. Check your network and try again.";
+            }
+            if (c instanceof java.net.SocketTimeoutException) {
+                return "Network timeout. Please try again.";
+            }
+        }
+        return "Network error. Please try again.";
+    }
+
     /** Convenience: parse the response and return the user-facing message for its code. */
     public static String messageFor(Response<?> response) {
         ApiError err = parse(response);

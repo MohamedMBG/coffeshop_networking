@@ -1,14 +1,17 @@
 package com.example.loyaltyapp.data.repository;
 
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
+import com.example.loyaltyapp.ApiClient;
+import com.example.loyaltyapp.ApiErrors;
+import com.example.loyaltyapp.ApiResponse;
+import com.example.loyaltyapp.ApiService;
+import com.example.loyaltyapp.Idempotency;
 import com.example.loyaltyapp.models.Rewards;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -20,15 +23,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class RewardsRepository {
     private static final String TAG = "RewardsRepository";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    // Injected once so the Retrofit proxy isn't rebuilt per call and can be
+    // swapped in tests.
+    private final ApiService api;
+
+    public RewardsRepository() {
+        this(ApiClient.getClient().create(ApiService.class));
+    }
+
+    @VisibleForTesting
+    public RewardsRepository(ApiService api) {
+        this.api = api;
+    }
+
     private static final String COL_REWARDS = "rewards_catalog";
-    private static final String COL_USERS = "users";
-    private static final String COL_ACTIVITIES = "activities";
 
     // Firestore Fields
     private static final String F_ACTIVE = "active";
@@ -36,8 +52,6 @@ public class RewardsRepository {
     private static final String F_POINTS = "cost";
     private static final String F_NAME = "name";
     private static final String F_IMAGE = "imageUrl";
-    private static final String F_DESC = "description";
-    private static final String F_TERMS = "termsUrl";
     private static final String F_EXP_DAYS = "expirationDays";
 
     public interface OnRewardsLoaded {
@@ -46,7 +60,12 @@ public class RewardsRepository {
     }
 
     public interface RedeemCallback {
-        void onSuccess();
+        /**
+         * @param code             pending redeem code to show as a QR for the cashier
+         * @param expiresAtEpochMs when the pending code expires (drives the countdown)
+         * @param totalPoints      remaining balance after the deduction
+         */
+        void onSuccess(String code, long expiresAtEpochMs, int totalPoints);
         void onError(String message);
     }
 
@@ -58,7 +77,7 @@ public class RewardsRepository {
 
         // Try ordering on the server first (requires composite index)
         Query orderedQuery = q.orderBy(F_POINTS, Query.Direction.ASCENDING);
-        
+
         orderedQuery.get(Source.SERVER)
                 .addOnSuccessListener(snap -> callback.onSuccess(parseSnap(snap, false)))
                 .addOnFailureListener(err -> {
@@ -66,13 +85,13 @@ public class RewardsRepository {
                     if (err instanceof FirebaseFirestoreException &&
                             ((FirebaseFirestoreException) err).getCode() == FirebaseFirestoreException.Code.FAILED_PRECONDITION) {
                         Log.w(TAG, "Missing index, sorting on client.", err);
-                        
+
                         // Query without orderBy
                         Query fallbackQuery = db.collection(COL_REWARDS).whereEqualTo(F_ACTIVE, true);
                         if (!"all".equalsIgnoreCase(categoryFilter)) {
                             fallbackQuery = fallbackQuery.whereEqualTo(F_CATEGORY, categoryFilter);
                         }
-                        
+
                         fallbackQuery.get(Source.SERVER)
                                 .addOnSuccessListener(snap -> callback.onSuccess(parseSnap(snap, true)))
                                 .addOnFailureListener(callback::onError);
@@ -114,77 +133,69 @@ public class RewardsRepository {
         Long pts = d.getLong(F_POINTS);
         if (pts == null) pts = d.getLong("redeemPoints");
         r.redeemPoints = pts != null ? pts.intValue() : 0;
-        long e = d.getLong(F_EXP_DAYS) != null ? d.getLong(F_EXP_DAYS) : 30;
         return r;
     }
 
-    public void submitRedemption(Rewards reward, RedeemCallback callback) {
-        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
-        if (u == null) {
-            callback.onError("User not authenticated");
-            return;
-        }
-        String uid = u.getUid();
-        
-        DocumentReference userRef = db.collection(COL_USERS).document(uid);
-        DocumentReference logRef = userRef.collection(COL_ACTIVITIES).document();
-        
-        db.runTransaction(transaction -> {
-            DocumentSnapshot userSnap = transaction.get(userRef);
-            if (!userSnap.exists()) {
-                throw new FirebaseFirestoreException("User not found", FirebaseFirestoreException.Code.NOT_FOUND);
-            }
+    /**
+     * Redeem a reward through the backend (POST /rewards/redeem). The backend
+     * deducts the points and returns a pending code the customer shows to the
+     * cashier; it does NOT complete the spend. Deducting points on the client is
+     * blocked by firestore.rules, so this replaces the old in-app transaction.
+     */
+    public void redeem(String rewardId, RedeemCallback cb) {
+        // One idempotency key per redeem tap; a retry replays instead of
+        // charging twice or creating a second pending code.
+        api.redeem(Idempotency.newKey(), new ApiService.RedeemRequest(rewardId))
+                .enqueue(new retrofit2.Callback<ApiResponse<ApiService.RedeemResult>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<ApiService.RedeemResult>> call,
+                                           Response<ApiResponse<ApiService.RedeemResult>> resp) {
+                        ApiResponse<ApiService.RedeemResult> body = resp.body();
+                        if (resp.isSuccessful() && body != null && body.ok && body.data != null) {
+                            ApiService.RedeemResult d = body.data;
+                            cb.onSuccess(d.code, d.expiresAtEpochMs, d.totalPoints);
+                        } else {
+                            cb.onError(ApiErrors.messageFor(resp));
+                        }
+                    }
 
-            Long currentPointsLong = userSnap.getLong("points");
-            int currentPoints = currentPointsLong != null ? currentPointsLong.intValue() : 0;
-            
-            if (currentPoints < reward.redeemPoints) {
-                throw new FirebaseFirestoreException("Insufficient points", FirebaseFirestoreException.Code.ABORTED);
-            }
+                    @Override
+                    public void onFailure(Call<ApiResponse<ApiService.RedeemResult>> call, Throwable throwable) {
+                        Log.e(TAG, "redeem transport failure", throwable);
+                        cb.onError(ApiErrors.networkMessageFor(throwable));
+                    }
+                });
+    }
 
-            // Deduct points
-            transaction.update(userRef, "points", currentPoints - reward.redeemPoints);
-
-            // Create activity log
-            transaction.set(logRef, new RedemptionLog(
-                    "redemption",
-                    Timestamp.now(),
-                    -reward.redeemPoints,
-                    reward.name,
-                    reward.id,
-                    "completed"
-            ));
-
-            return null;
-        }).addOnSuccessListener(ignored -> {
-            callback.onSuccess();
-        }).addOnFailureListener(err -> {
-            callback.onError(err.getMessage());
-        });
+    public interface CancelCallback {
+        void onSuccess(int refunded, int totalPoints);
+        void onError(String message);
     }
 
     /**
-     * P1: aligned to the normalized activity log schema (see ActivityEvent
-     * javadoc). Renamed `rewardId` to `refId` so all activity sources write
-     * the same field names. Firestore POJO serialization writes public fields
-     * verbatim.
+     * Cancel a pending redeem (POST /rewards/redeem/cancel). The backend refunds
+     * the points and clears the pending code — used to escape the one-pending
+     * limit or when the customer changes their mind.
      */
-    public static class RedemptionLog {
-        public String type;
-        public Timestamp ts;
-        public int delta;
-        public String desc;
-        public String refId;
-        public String status;
+    public void cancelRedeem(String code, CancelCallback cb) {
+        api.cancelRedeem(Idempotency.newKey(), new ApiService.CancelRequest(code))
+                .enqueue(new retrofit2.Callback<ApiResponse<ApiService.CancelResult>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<ApiService.CancelResult>> call,
+                                           Response<ApiResponse<ApiService.CancelResult>> resp) {
+                        ApiResponse<ApiService.CancelResult> body = resp.body();
+                        if (resp.isSuccessful() && body != null && body.ok && body.data != null) {
+                            cb.onSuccess(body.data.refunded, body.data.totalPoints);
+                        } else {
+                            cb.onError(ApiErrors.messageFor(resp));
+                        }
+                    }
 
-        public RedemptionLog() {}
-        public RedemptionLog(String type, Timestamp ts, int delta, String desc, String refId, String status) {
-            this.type = type;
-            this.ts = ts;
-            this.delta = delta;
-            this.desc = desc;
-            this.refId = refId;
-            this.status = status;
-        }
+                    @Override
+                    public void onFailure(Call<ApiResponse<ApiService.CancelResult>> call, Throwable throwable) {
+                        Log.e(TAG, "cancel transport failure", throwable);
+                        cb.onError(ApiErrors.networkMessageFor(throwable));
+                    }
+                });
     }
 }

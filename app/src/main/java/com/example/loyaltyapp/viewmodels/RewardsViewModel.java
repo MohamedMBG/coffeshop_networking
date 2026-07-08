@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
+import com.example.loyaltyapp.Event;
 import com.example.loyaltyapp.data.repository.RewardsRepository;
 import com.example.loyaltyapp.data.repository.UserRepository;
 import com.example.loyaltyapp.models.Rewards;
@@ -20,8 +21,10 @@ public class RewardsViewModel extends ViewModel {
     private final MutableLiveData<List<Rewards>> rewardsList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
-    private final MutableLiveData<RedemptionState> redemptionState = new MutableLiveData<>();
-    
+    // One-time signals (Event) so a config change doesn't re-fire the dialog/toast.
+    private final MutableLiveData<Event<RedemptionState>> redemptionState = new MutableLiveData<>();
+    private final MutableLiveData<Event<Integer>> cancelRefunded = new MutableLiveData<>();
+
     // Listen to real-time points from UserRepository
     private final MutableLiveData<User> userData = new MutableLiveData<>();
     private final MutableLiveData<Integer> userPoints = new MutableLiveData<>(0);
@@ -73,8 +76,12 @@ public class RewardsViewModel extends ViewModel {
         return userPoints;
     }
 
-    public LiveData<RedemptionState> getRedemptionState() {
+    public LiveData<Event<RedemptionState>> getRedemptionState() {
         return redemptionState;
+    }
+
+    public LiveData<Event<Integer>> getCancelRefunded() {
+        return cancelRefunded;
     }
 
     public void setFilter(String filter) {
@@ -107,33 +114,51 @@ public class RewardsViewModel extends ViewModel {
 
     public void redeemReward(Rewards reward) {
         isLoading.setValue(true);
-        redemptionState.setValue(new RedemptionState(false, null, false));
 
-        rewardsRepo.submitRedemption(reward, new RewardsRepository.RedeemCallback() {
+        rewardsRepo.redeem(reward.id, new RewardsRepository.RedeemCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String code, long expiresAtEpochMs, int totalPoints) {
                 isLoading.postValue(false);
-                redemptionState.postValue(new RedemptionState(true, null, true));
+                // Carry the pending code + expiry so the fragment can show a QR
+                // with a countdown for the cashier to scan.
+                redemptionState.postValue(new Event<>(
+                        new RedemptionState(true, null, true, code, expiresAtEpochMs)));
             }
 
             @Override
             public void onError(String message) {
                 isLoading.postValue(false);
                 errorMessage.postValue(message);
-                redemptionState.postValue(new RedemptionState(true, message, false));
+                redemptionState.postValue(new Event<>(
+                        new RedemptionState(true, message, false, null, 0L)));
             }
         });
     }
 
-    // Call this from Fragment to start listening (UID comes from an Auth ViewModel/Repo ideally, 
+    /**
+     * Cancel a pending redeem by its code. On success the balance refresh comes
+     * through the users/{uid} snapshot listener; here we just surface the
+     * refunded amount for a confirmation toast. Errors reuse errorMessage.
+     */
+    public void cancelRedeem(String code) {
+        rewardsRepo.cancelRedeem(code, new RewardsRepository.CancelCallback() {
+            @Override
+            public void onSuccess(int refunded, int totalPoints) {
+                cancelRefunded.postValue(new Event<>(refunded));
+            }
+
+            @Override
+            public void onError(String message) {
+                errorMessage.postValue(message);
+            }
+        });
+    }
+
+    // Call this from Fragment to start listening (UID comes from an Auth ViewModel/Repo ideally,
     // but for now let's set it if Fragment knows it, or we can add it to UserRepository). 
     // Let's create an init method.
     public void init(String uid) {
         userRepo.listenToUser(uid, userData);
-    }
-
-    public void resetRedemptionState() {
-        redemptionState.setValue(null);
     }
 
     @Override
@@ -149,11 +174,16 @@ public class RewardsViewModel extends ViewModel {
         public final boolean isFinished;
         public final String error;
         public final boolean isSuccess;
+        public final String code;             // pending redeem code (success only)
+        public final long expiresAtEpochMs;   // countdown target (success only)
 
-        public RedemptionState(boolean isFinished, String error, boolean isSuccess) {
+        public RedemptionState(boolean isFinished, String error, boolean isSuccess,
+                               String code, long expiresAtEpochMs) {
             this.isFinished = isFinished;
             this.error = error;
             this.isSuccess = isSuccess;
+            this.code = code;
+            this.expiresAtEpochMs = expiresAtEpochMs;
         }
     }
 }

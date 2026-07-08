@@ -16,8 +16,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
 
 import com.example.loyaltyapp.data.repository.ScanRepository;
-import com.google.android.gms.tasks.Task;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -98,6 +96,7 @@ public class ScanViewModelTest {
         assertNotNull(state);
         assertTrue(state.isSuccess);
         assertEquals("+10 Points", state.successMain);
+        assertEquals("Balance: 110 pts", state.successSub);
     }
 
     @Test
@@ -117,35 +116,5 @@ public class ScanViewModelTest {
         ScanViewModel.ScanState state = viewModel.getScanState().getValue();
         assertNotNull(state);
         assertEquals("This code has expired.", state.errorMsg);
-    }
-
-    @Test
-    public void testProcessScannedCode_ValidRedeemCode_CallsExecuteSpend() {
-        // Arrange
-        // REDEEM|codeId|userUid|costPoints
-        String code = "REDEEM|redeemId123|user123|50";
-        Task<String> mockTask = Tasks.forResult("Free Coffee");
-        when(mockRepository.executeSpendTransaction(eq("redeemId123"), eq("user123"), eq(50), eq("user123"))).thenReturn(mockTask);
-
-        // Act
-        viewModel.processScannedCode(code);
-
-        // Assert
-        verify(mockRepository).executeSpendTransaction(eq("redeemId123"), eq("user123"), eq(50), eq("user123"));
-    }
-
-    @Test
-    public void testProcessScannedCode_RedeemCodeForDifferentUser_PostsError() {
-        // Arrange
-        // Current user is user123, code is for userXYZ
-        String code = "REDEEM|redeemId123|userXYZ|50";
-
-        // Act
-        viewModel.processScannedCode(code);
-
-        // Assert
-        ScanViewModel.ScanState state = viewModel.getScanState().getValue();
-        assertNotNull(state);
-        assertTrue(state.errorMsg.contains("belongs to another account"));
     }
 }

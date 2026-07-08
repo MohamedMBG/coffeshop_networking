@@ -111,24 +111,44 @@ public class RewardsFragment extends Fragment {
             if (adapter != null) adapter.notifyDataSetChanged();
         });
 
-        viewModel.getRedemptionState().observe(getViewLifecycleOwner(), state -> {
-            if (state == null) return;
-            if (state.isFinished) {
-                if (state.isSuccess) {
-                    Toast.makeText(requireContext(), "Reward Redeemed Successfully!", Toast.LENGTH_SHORT).show();
-                } else if (state.error != null) {
-                    Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
-                }
-                viewModel.resetRedemptionState();
+        viewModel.getRedemptionState().observe(getViewLifecycleOwner(), event -> {
+            RewardsViewModel.RedemptionState state =
+                    event == null ? null : event.getContentIfNotHandled();
+            if (state == null) return; // already handled or no event
+            if (state.isSuccess && state.code != null) {
+                // Backend deducted the points and issued a pending code; show it
+                // as a QR for the cashier to scan.
+                com.example.loyaltyapp.RedeemCodeDialog
+                        .newInstance(state.code, state.expiresAtEpochMs)
+                        .show(getParentFragmentManager(), "redeem_code");
+            } else if (state.error != null) {
+                Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
             }
         });
         
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
-        
+
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
                 Toast.makeText(requireContext(), "Error: " + msg, Toast.LENGTH_LONG).show();
             }
+        });
+
+        // The redeem dialog's "Cancel reward" button hands back the pending code;
+        // the ViewModel performs the cancel/refund.
+        getParentFragmentManager().setFragmentResultListener(
+                com.example.loyaltyapp.RedeemCodeDialog.REQUEST_CANCEL,
+                getViewLifecycleOwner(),
+                (key, bundle) -> {
+                    String code = bundle.getString(com.example.loyaltyapp.RedeemCodeDialog.RESULT_CODE);
+                    if (code != null) viewModel.cancelRedeem(code);
+                });
+
+        viewModel.getCancelRefunded().observe(getViewLifecycleOwner(), event -> {
+            Integer refunded = event == null ? null : event.getContentIfNotHandled();
+            if (refunded == null) return; // already handled or no event
+            Toast.makeText(requireContext(),
+                    getString(R.string.redeem_cancelled_format, refunded), Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -165,21 +185,15 @@ public class RewardsFragment extends Fragment {
         return (s == null) ? "" : s;
     }
 
-    // Redemption is intentionally disabled until backend issues a redeem
-    // code and confirms it at the cashier. Do NOT call viewModel.redeemReward
-    // from the client — Firestore rules block client-side points mutation
-    // and any deduction here would only succeed against an unsecured DB.
+    // Redeem through the backend: it deducts the points and returns a pending
+    // code shown as a QR (see the redemptionState observer). The cashier scans
+    // that code to complete the spend — the client never mutates points.
     private void onRedeemClicked(@NonNull Rewards r) {
         if (userPoints < r.redeemPoints) {
             Toast.makeText(requireContext(), "Not enough points yet", Toast.LENGTH_SHORT).show();
             return;
         }
-        Snackbar.make(requireView(),
-                "Redemption coming soon. Your points are safe.",
-                Snackbar.LENGTH_LONG)
-                .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
-                .setAction("OK", v -> { })
-                .show();
+        viewModel.redeemReward(r);
     }
 
         // showLoadError is no longer needed since errors are handled by observing getErrorMessage() in onViewCreated
