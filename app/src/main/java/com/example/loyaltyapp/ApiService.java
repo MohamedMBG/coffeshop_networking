@@ -110,10 +110,6 @@ public interface ApiService {
     @POST("api/verify")
     Call<VerifyResponse> verifyToken(@Body Map<String, String> body);
 
-    @Deprecated
-    @POST("api/rewards/birthday")
-    Call<Map<String, Object>> claimBirthdayReward(@Body Map<String, String> body);
-
     // Plain POJO for legacy /verify
     class VerifyResponse {
         public boolean ok;

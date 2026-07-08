@@ -50,5 +50,6 @@
     <string name="punch_card_reward_earned_subtitle">Redeem your free coffee at the store!</string>
     <string name="punch_card_needed">%1$d more coffees until your next free one!</string>
     <string name="punch_card_reward_ready">Reward Ready!</string>
+    <string name="birthday_reward_awarded">🎉 Happy Birthday! +%1$d points added!</string>
 
 </resources>
