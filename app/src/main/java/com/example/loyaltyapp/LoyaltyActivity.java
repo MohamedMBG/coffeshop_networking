@@ -194,32 +194,34 @@ public class LoyaltyActivity extends AppCompatActivity {
 
 
     private void checkBirthdayReward() {
-        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
-        if (u == null)
+        if (FirebaseAuth.getInstance().getCurrentUser() == null)
             return;
 
-        Map<String, String> body = new HashMap<>();
-        body.put("uid", u.getUid());
-
+        // POST /rewards/birthday: no body, backend derives the user from the
+        // token. The birthday_claims year-guard makes double-claims impossible
+        // server-side, so a fresh idempotency key per startup check is fine.
         ApiService api = ApiClient.getClient().create(ApiService.class);
-        api.claimBirthdayReward(body).enqueue(new retrofit2.Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(retrofit2.Call<Map<String, Object>> call,
-                    retrofit2.Response<Map<String, Object>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Boolean success = (Boolean) response.body().get("success");
-                    if (Boolean.TRUE.equals(success)) {
-                        Toast.makeText(LoyaltyActivity.this, "🎉 Happy Birthday! +15 points added!", Toast.LENGTH_LONG)
-                                .show();
+        api.redeemBirthday(Idempotency.newKey())
+                .enqueue(new retrofit2.Callback<ApiResponse<ApiService.BirthdayResult>>() {
+                    @Override
+                    public void onResponse(retrofit2.Call<ApiResponse<ApiService.BirthdayResult>> call,
+                            retrofit2.Response<ApiResponse<ApiService.BirthdayResult>> response) {
+                        ApiResponse<ApiService.BirthdayResult> body = response.body();
+                        if (response.isSuccessful() && body != null && body.ok && body.data != null) {
+                            Toast.makeText(LoyaltyActivity.this,
+                                    "🎉 Happy Birthday! +" + body.data.pointsGranted + " points added!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                        // Non-2xx on this silent startup check (BIRTHDAY_NOT_TODAY,
+                        // BIRTHDAY_NOT_SET, BIRTHDAY_ALREADY_CLAIMED) is expected on
+                        // any normal day — ignore quietly.
                     }
-                }
-            }
 
-            @Override
-            public void onFailure(retrofit2.Call<Map<String, Object>> call, Throwable t) {
-                // Silently ignore failures on startup
-            }
-        });
+                    @Override
+                    public void onFailure(retrofit2.Call<ApiResponse<ApiService.BirthdayResult>> call, Throwable t) {
+                        // Silently ignore network failures on startup.
+                    }
+                });
     }
 
     private void handleUserDoc(User user) {
