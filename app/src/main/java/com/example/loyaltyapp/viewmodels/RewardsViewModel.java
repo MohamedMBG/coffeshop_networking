@@ -21,7 +21,9 @@ public class RewardsViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<RedemptionState> redemptionState = new MutableLiveData<>();
-    
+    // Points refunded by a successful cancel; the fragment toasts it.
+    private final MutableLiveData<Integer> cancelRefunded = new MutableLiveData<>();
+
     // Listen to real-time points from UserRepository
     private final MutableLiveData<User> userData = new MutableLiveData<>();
     private final MutableLiveData<Integer> userPoints = new MutableLiveData<>(0);
@@ -77,6 +79,10 @@ public class RewardsViewModel extends ViewModel {
         return redemptionState;
     }
 
+    public LiveData<Integer> getCancelRefunded() {
+        return cancelRefunded;
+    }
+
     public void setFilter(String filter) {
         if (!activeFilter.equals(filter)) {
             activeFilter = filter;
@@ -127,7 +133,26 @@ public class RewardsViewModel extends ViewModel {
         });
     }
 
-    // Call this from Fragment to start listening (UID comes from an Auth ViewModel/Repo ideally, 
+    /**
+     * Cancel a pending redeem by its code. On success the balance refresh comes
+     * through the users/{uid} snapshot listener; here we just surface the
+     * refunded amount for a confirmation toast. Errors reuse errorMessage.
+     */
+    public void cancelRedeem(String code) {
+        rewardsRepo.cancelRedeem(code, new RewardsRepository.CancelCallback() {
+            @Override
+            public void onSuccess(int refunded, int totalPoints) {
+                cancelRefunded.postValue(refunded);
+            }
+
+            @Override
+            public void onError(String message) {
+                errorMessage.postValue(message);
+            }
+        });
+    }
+
+    // Call this from Fragment to start listening (UID comes from an Auth ViewModel/Repo ideally,
     // but for now let's set it if Fragment knows it, or we can add it to UserRepository). 
     // Let's create an init method.
     public void init(String uid) {
@@ -136,6 +161,12 @@ public class RewardsViewModel extends ViewModel {
 
     public void resetRedemptionState() {
         redemptionState.setValue(null);
+    }
+
+    // Clear after the fragment toasts it so a config change (re-observe) does
+    // not re-fire the refund toast with a stale value.
+    public void resetCancelRefunded() {
+        cancelRefunded.setValue(null);
     }
 
     @Override

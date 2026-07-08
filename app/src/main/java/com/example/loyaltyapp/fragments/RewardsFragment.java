@@ -126,11 +126,29 @@ public class RewardsFragment extends Fragment {
         });
         
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
-        
+
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
                 Toast.makeText(requireContext(), "Error: " + msg, Toast.LENGTH_LONG).show();
             }
+        });
+
+        // The redeem dialog's "Cancel reward" button hands back the pending code;
+        // the ViewModel performs the cancel/refund.
+        getParentFragmentManager().setFragmentResultListener(
+                com.example.loyaltyapp.RedeemCodeDialog.REQUEST_CANCEL,
+                getViewLifecycleOwner(),
+                (key, bundle) -> {
+                    String code = bundle.getString(com.example.loyaltyapp.RedeemCodeDialog.RESULT_CODE);
+                    if (code != null) viewModel.cancelRedeem(code);
+                });
+
+        viewModel.getCancelRefunded().observe(getViewLifecycleOwner(), refunded -> {
+            if (refunded == null) return;
+            Toast.makeText(requireContext(),
+                    getString(R.string.redeem_cancelled_format, refunded), Toast.LENGTH_SHORT).show();
+            // One-time event: clear so rotation doesn't re-toast the stale value.
+            viewModel.resetCancelRefunded();
         });
     }
 

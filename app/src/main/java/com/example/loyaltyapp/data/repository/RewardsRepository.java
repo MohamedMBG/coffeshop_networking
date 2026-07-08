@@ -166,4 +166,36 @@ public class RewardsRepository {
                     }
                 });
     }
+
+    public interface CancelCallback {
+        void onSuccess(int refunded, int totalPoints);
+        void onError(String message);
+    }
+
+    /**
+     * Cancel a pending redeem (POST /rewards/redeem/cancel). The backend refunds
+     * the points and clears the pending code — used to escape the one-pending
+     * limit or when the customer changes their mind.
+     */
+    public void cancelRedeem(String code, CancelCallback cb) {
+        api.cancelRedeem(Idempotency.newKey(), new ApiService.CancelRequest(code))
+                .enqueue(new retrofit2.Callback<ApiResponse<ApiService.CancelResult>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<ApiService.CancelResult>> call,
+                                           Response<ApiResponse<ApiService.CancelResult>> resp) {
+                        ApiResponse<ApiService.CancelResult> body = resp.body();
+                        if (resp.isSuccessful() && body != null && body.ok && body.data != null) {
+                            cb.onSuccess(body.data.refunded, body.data.totalPoints);
+                        } else {
+                            cb.onError(ApiErrors.messageFor(resp));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<ApiService.CancelResult>> call, Throwable throwable) {
+                        Log.e(TAG, "cancel transport failure", throwable);
+                        cb.onError(ApiErrors.networkMessageFor(throwable));
+                    }
+                });
+    }
 }

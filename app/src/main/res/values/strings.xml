@@ -57,5 +57,7 @@
     <string name="redeem_done_button">Done</string>
     <string name="redeem_expires_format">Expires in %1$d:%2$02d</string>
     <string name="redeem_expired">Expired</string>
+    <string name="redeem_cancel_button">Cancel reward</string>
+    <string name="redeem_cancelled_format">Reward cancelled. %1$d points refunded.</string>
 
 </resources>
