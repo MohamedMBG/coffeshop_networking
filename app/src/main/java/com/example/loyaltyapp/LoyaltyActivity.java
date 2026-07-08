@@ -209,7 +209,7 @@ public class LoyaltyActivity extends AppCompatActivity {
                         ApiResponse<ApiService.BirthdayResult> body = response.body();
                         if (response.isSuccessful() && body != null && body.ok && body.data != null) {
                             Toast.makeText(LoyaltyActivity.this,
-                                    "🎉 Happy Birthday! +" + body.data.pointsGranted + " points added!",
+                                    getString(R.string.birthday_reward_awarded, body.data.pointsGranted),
                                     Toast.LENGTH_LONG).show();
                         }
                         // Non-2xx on this silent startup check (BIRTHDAY_NOT_TODAY,
