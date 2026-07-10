@@ -113,6 +113,4 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    //firebase admin sdk
-    implementation("com.google.firebase:firebase-admin:9.3.0")
 }
