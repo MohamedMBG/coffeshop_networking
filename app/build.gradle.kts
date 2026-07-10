@@ -22,6 +22,11 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
+            "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
+        )
+        buildConfigField(
+            "String",
+            "LEGACY_EMAIL_API_BASE_URL",
             "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
         )
     }
@@ -32,6 +37,11 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
+                "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
+            )
+            buildConfigField(
+                "String",
+                "LEGACY_EMAIL_API_BASE_URL",
                 "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
             )
         }
@@ -49,6 +59,11 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
+                "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
+            )
+            buildConfigField(
+                "String",
+                "LEGACY_EMAIL_API_BASE_URL",
                 "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
             )
         }

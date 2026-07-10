@@ -56,7 +56,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        api = ApiClient.getClient().create(ApiService.class);
+        api = EmailApiClient.getClient().create(ApiService.class);
 
         binding.continueButton.setOnClickListener(v -> onContinue());
 

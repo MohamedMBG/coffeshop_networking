@@ -22,7 +22,7 @@ public class ApiClientTest {
         assertSame("Retrofit instances should be the same across calls (singleton)", retrofit1, retrofit2);
 
         assertEquals("Base URL should end with a trailing slash",
-                "https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/",
+                "https://bean-backend-ejzg.onrender.com/api/v1/",
                 retrofit1.baseUrl().toString());
     }
 }
