@@ -52,6 +52,13 @@
 # Our API DTOs (Gson reflects into them).
 -keep class com.example.loyaltyapp.ApiService$* { *; }
 
+# REST response envelopes. Top-level (not under .models, not nested in ApiService),
+# so nothing above kept them and R8 renamed their fields — Gson then couldn't map
+# {ok,data} / {ok,code,message}, so every REST write (earn/redeem) read as a failure
+# and surfaced "Something went wrong". Keep the field names.
+-keep class com.example.loyaltyapp.ApiResponse { *; }
+-keep class com.example.loyaltyapp.ApiError { *; }
+
 # ------------------------------------------------------------
 # Glide
 # ------------------------------------------------------------
