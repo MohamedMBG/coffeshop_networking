@@ -326,3 +326,19 @@ Instrumentation contains the default app-context package test.
 - `RewardsRepository.parseReward()` does not populate `priceMAD`, `description`, or `termsUrl` into `Rewards`; the UI price may show `0 MAD` unless the model/repository is extended.
 - Empty placeholder model classes (`AppSettings`, `QRCode`, `Scans`) and unused top-level API DTOs can be removed or completed once the intended APIs are finalized.
 - The navigation graph exists, but `LoyaltyActivity` currently performs manual fragment transactions and does not use Navigation UI.
+
+## Push Segmentation Signals And Device Lifecycle
+
+- `TokenRegistrar` registers the install's stable device id and current FCM token with the secured
+  backend. Logout first calls `/api/v1/push/unregisterDevice` while the Firebase identity is still
+  available, then deletes the local FCM token and signs out. This prevents delivery to the previous
+  member on a shared device.
+- Selecting a menu category or tapping a menu item sends a non-blocking authenticated
+  `/api/v1/push/interest` event through `InterestRepository`. Same-category events are locally
+  debounced for 15 seconds; the backend validates/rate-limits them and maintains the customer's
+  top interest.
+- `MyFirebaseService` handles foreground FCM messages and creates the notification channel.
+  Background notification messages are displayed by Android/FCM. `LoyaltyActivity` requests
+  `POST_NOTIFICATIONS` on Android 13+.
+- Interest delivery failures do not block menu browsing. They are diagnostic-only signals and do
+  not affect loyalty balances, rewards, or ordering.

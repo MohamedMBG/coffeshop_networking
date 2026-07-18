@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.loyaltyapp.data.repository.ConfigRepository;
+import com.example.loyaltyapp.data.repository.InterestRepository;
 import com.example.loyaltyapp.data.repository.MenuRepository;
 import com.example.loyaltyapp.models.MenuItemModel;
 
@@ -21,6 +22,7 @@ public class HomeViewModel extends ViewModel {
     private final MenuRepository menuRepo;
     private final ConfigRepository configRepo;
     private final UserRepository userRepo;
+    private final InterestRepository interestRepo;
 
     // Use LiveData to notify the Fragment
     private final MutableLiveData<List<MenuItemModel>> menuList = new MutableLiveData<>();
@@ -32,6 +34,7 @@ public class HomeViewModel extends ViewModel {
         menuRepo = new MenuRepository();
         configRepo = new ConfigRepository();
         userRepo = new UserRepository();
+        interestRepo = new InterestRepository();
 
         // Load default lists
         loadPopularItems();
@@ -60,8 +63,14 @@ public class HomeViewModel extends ViewModel {
         if (category == null) {
             loadPopularItems();
         } else {
+            interestRepo.record(category);
             menuRepo.listenToCategory(category, menuList);
         }
+    }
+
+    /** Record the category of a menu item the customer actively selected. */
+    public void recordInterest(String category) {
+        interestRepo.record(category);
     }
 
     private void loadPopularItems() {

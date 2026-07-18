@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.loyaltyapp.LoyaltyActivity;
 import com.example.loyaltyapp.R;
 import com.example.loyaltyapp.SignUpActivity;
+import com.example.loyaltyapp.services.TokenRegistrar;
 import com.example.loyaltyapp.viewmodels.ProfileViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
@@ -246,10 +247,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void logOut() {
-        if (auth != null)
-            auth.signOut();
-        startActivity(new Intent(requireContext(), SignUpActivity.class));
-        requireActivity().finish();
+        logoutLayout.setEnabled(false);
+        TokenRegistrar.unregisterForLogout(requireContext(), () -> {
+            if (auth != null) auth.signOut();
+            if (!isAdded()) return;
+            startActivity(new Intent(requireContext(), SignUpActivity.class));
+            requireActivity().finish();
+        });
     }
 
     @Override

@@ -1269,6 +1269,19 @@ The implementation is complete when:
 11. Staging deployment passes manual QA.
 12. Production has rollback and monitoring.
 
+### Push campaign extension — implemented 2026-07-18
+
+- Device registration is complemented by authenticated logout unregistration and local FCM token
+  invalidation.
+- Menu category selection and menu item taps feed a backend-owned top-interest aggregate; clients
+  cannot submit a UID or overwrite another member's profile.
+- Admin preview/send uses one backend selector across profile demographics, birthday, location,
+  behavioral interest, and purchase-derived visit recency.
+- Backend and customer full unit suites passed. Admin debug compilation and its feature-specific
+  inbox tests passed; its full suite remains blocked by three unrelated existing Mockito/Java 21
+  initialization failures in `DashboardViewModelTest`. A deployed multi-device FCM smoke test
+  remains in the verification gate.
+
 ---
 
 ## 13. Recommended Start
