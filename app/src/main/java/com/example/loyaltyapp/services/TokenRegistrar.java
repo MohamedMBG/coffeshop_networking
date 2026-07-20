@@ -8,6 +8,7 @@ import com.example.loyaltyapp.ApiClient;
 import com.example.loyaltyapp.ApiResponse;
 import com.example.loyaltyapp.ApiService;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.UUID;
 
@@ -76,5 +77,43 @@ public final class TokenRegistrar {
             p.edit().putString(KEY_DEVICE_ID, id).apply();
         }
         return id;
+    }
+
+    /**
+     * Disable this install on the backend before logout, then invalidate the local FCM token.
+     * The completion always runs so logout is not blocked by an outage; deleting the FCM token
+     * still prevents the stale server token from delivering, and a later campaign marks it dead.
+     *
+     * @param ctx application or activity context.
+     * @param completion action that signs the user out and navigates away.
+     */
+    public static void unregisterForLogout(Context ctx, Runnable completion) {
+        Context app = ctx.getApplicationContext();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            deleteTokenAndFinish(completion);
+            return;
+        }
+        ApiService api = ApiClient.getClient().create(ApiService.class);
+        api.unregisterDevice(new ApiService.DeviceIdRequest(deviceId(app)))
+                .enqueue(new Callback<ApiResponse<ApiService.UnregisterDeviceResult>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<ApiService.UnregisterDeviceResult>> call,
+                                           Response<ApiResponse<ApiService.UnregisterDeviceResult>> response) {
+                        Log.i(TAG, "unregisterDevice code=" + response.code());
+                        deleteTokenAndFinish(completion);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<ApiService.UnregisterDeviceResult>> call,
+                                          Throwable error) {
+                        Log.w(TAG, "unregisterDevice unavailable; invalidating local token", error);
+                        deleteTokenAndFinish(completion);
+                    }
+                });
+    }
+
+    private static void deleteTokenAndFinish(Runnable completion) {
+        FirebaseMessaging.getInstance().deleteToken()
+                .addOnCompleteListener(task -> completion.run());
     }
 }
