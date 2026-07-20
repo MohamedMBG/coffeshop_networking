@@ -39,6 +39,12 @@ public interface ApiService {
     @POST("push/registerDevice")
     Call<ApiResponse<DeviceResult>> registerDevice(@Body DeviceRequest body);
 
+    @POST("push/unregisterDevice")
+    Call<ApiResponse<UnregisterDeviceResult>> unregisterDevice(@Body DeviceIdRequest body);
+
+    @POST("push/interest")
+    Call<ApiResponse<InterestResult>> recordInterest(@Body InterestRequest body);
+
     // ---- Request DTOs ------------------------------------------------------
 
     class EarnRequest {
@@ -65,6 +71,20 @@ public interface ApiService {
             this.fcmToken = fcmToken;
             this.platform = platform;
         }
+    }
+
+    /** Identifies this app installation for authenticated logout unregistration. */
+    class DeviceIdRequest {
+        /** Client-generated stable installation id; the backend verifies its current owner. */
+        public String deviceId;
+        public DeviceIdRequest(String deviceId) { this.deviceId = deviceId; }
+    }
+
+    /** Behavioral menu signal used to calculate the authenticated customer's top interest. */
+    class InterestRequest {
+        /** Client-visible menu category; normalized and validated by the backend. */
+        public String category;
+        public InterestRequest(String category) { this.category = category; }
     }
 
     // ---- Response DTOs (payloads inside ApiResponse.data) -------------------
@@ -98,6 +118,22 @@ public interface ApiService {
     class DeviceResult {
         public String deviceId;
         public long lastSeenAt;
+    }
+
+    /** Confirms that an installation can no longer receive pushes for the previous user. */
+    class UnregisterDeviceResult {
+        /** Stable installation id supplied by the client. */
+        public String deviceId;
+        /** True when the backend device record is disabled or was already absent. */
+        public boolean disabled;
+    }
+
+    /** Updated interest aggregate returned after a category-selection event. */
+    class InterestResult {
+        /** Highest-scoring normalized menu category for the authenticated customer. */
+        public String topInterest;
+        /** New accumulated score for the submitted category. */
+        public long categoryScore;
     }
 
     // ---- Legacy (no backend route; removed in Step 3 once callers migrate) --

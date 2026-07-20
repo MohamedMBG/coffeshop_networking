@@ -92,8 +92,9 @@ public class HomeFragment extends Fragment {
         adapter = new MenuAdapter(new ArrayList<MenuItemModel>(), new MenuAdapter.OnItemClick() {
             @Override
             public void onClick(@NonNull MenuItemModel item) {
-                // P1: menu items are display-only until the ordering / add-to-cart
-                // flow exists. No-op intentionally; tapping is non-interactive.
+                // The menu remains display-only, but an explicit tap is a behavioral signal for
+                // the admin's "most interested in" campaign filter.
+                viewModel.recordInterest(item.getCategory());
             }
         });
         menuRv.setAdapter(adapter);
