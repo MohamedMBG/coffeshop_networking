@@ -46,6 +46,9 @@ android {
             )
         }
         release {
+            // Debug-signed so the APK is directly installable (no Play Store);
+            // swap for a real release keystore before any store publishing.
+            signingConfig = signingConfigs.getByName("debug")
             // P1: enable R8 + resource shrinking for release builds. Keeps the
             // APK smaller and strips unreachable code. Proguard rules for the
             // Firebase / Retrofit / Glide / ZXing reflection paths live in

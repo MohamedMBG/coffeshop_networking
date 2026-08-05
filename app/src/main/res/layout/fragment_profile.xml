@@ -4,144 +4,278 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?android:attr/colorBackground"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="#F5F5F5"
-            android:elevation="4dp"
+            android:background="@android:color/transparent"
             app:title="@string/profile_title"
             app:titleCentered="true"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="?android:attr/textColorPrimary" />
+
+        <!-- ===== Hero: avatar + name + email ===== -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
+
+            <FrameLayout
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:background="@drawable/bg_avatar_circle">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/profile_title"
+                    android:src="@drawable/ic_person"
+                    app:tint="@color/white" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/profile_name_placeholder"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/profile_email_placeholder"
+                android:textColor="#9E9E9E"
+                android:textSize="14sp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="?android:attr/colorBackground"
             android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="20dp">
+            android:paddingEnd="16dp">
 
-            <!-- Profile Information Card -->
+            <!-- ===== Reward points hero ===== -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_points_gradient"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="20dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:letterSpacing="0.12"
+                        android:text="REWARD POINTS"
+                        android:textColor="#D8CFC7"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvPoints"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/profile_points_placeholder"
+                        android:textColor="@color/white"
+                        android:textSize="40sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:alpha="0.9"
+                    android:contentDescription="@string/profile_saved_rewards_cd"
+                    android:src="@drawable/ic_star"
+                    app:tint="@color/white" />
+            </FrameLayout>
+
+            <!-- ===== Personal details ===== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardProfile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
-                app:cardUseCompatPadding="false">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="?attr/colorSurface"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
-                    <TextView
-                        android:id="@+id/tvName"
-                        android:layout_width="wrap_content"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/profile_name_placeholder"
-                        android:textSize="26sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvEmail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="@string/profile_email_placeholder"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/tvPhone"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/profile_phone_placeholder"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/tvBirthday"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/profile_birthday_placeholder"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
-
-                    <TextView
-                        android:id="@+id/tvGender"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/profile_gender_placeholder"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="20dp"
-                        android:layout_marginBottom="20dp"
-                        app:dividerColor="#E0E0E0" />
-
+                    <!-- Phone -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="20dp">
+                        android:gravity="center_vertical"
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/profile_phone_placeholder"
+                                android:src="@drawable/ic_phone"
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvPhone"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Reward Points"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/profile_phone_placeholder"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="56dp"
+                        android:background="@color/hairline" />
+
+                    <!-- Birthday -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/profile_edit_birthday_hint"
+                                android:src="@drawable/ic_calendar"
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
-                            android:id="@+id/tvPoints"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvBirthday"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/profile_points_placeholder"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/profile_birthday_placeholder"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="32sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="56dp"
+                        android:background="@color/hairline" />
+
+                    <!-- Gender -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:contentDescription="@string/profile_gender_placeholder"
+                                android:src="@drawable/ic_person"
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/tvGender"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:layout_weight="1"
+                            android:text="@string/profile_gender_placeholder"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-            <!-- Edit Profile Card -->
+
+            <!-- ===== Edit Profile Card ===== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/edit2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 android:visibility="visible"
-                app:cardCornerRadius="16dp"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardElevation="3dp"
-                app:cardUseCompatPadding="false">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:id="@+id/profileEditContainer"
@@ -157,21 +291,21 @@
                         android:layout_marginBottom="16dp"
                         android:text="Edit Profile"
                         android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textStyle="bold" />
 
                     <!-- Full Name -->
                     <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Full name"
-                        app:boxBackgroundColor="?attr/colorSurface"
                         app:boxCornerRadiusBottomEnd="12dp"
-                        app:cardBackgroundColor="?attr/colorSurface"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
-                        app:hintTextColor="#757575">
+                        app:boxStrokeColor="@color/coffee"
+                        app:hintTextColor="@color/coffee">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputFullName"
@@ -183,17 +317,18 @@
 
                     <!-- Phone Number -->
                     <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:hint="Phone Number"
-                        app:boxBackgroundColor="?attr/colorSurface"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="@color/coffee"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="#757575"
+                        app:hintTextColor="@color/coffee"
                         app:prefixText="+212 ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -207,17 +342,18 @@
 
                     <!-- Address -->
                     <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:hint="Address"
-                        app:boxBackgroundColor="?attr/colorSurface"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="@color/coffee"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="#757575">
+                        app:hintTextColor="@color/coffee">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputAddress"
@@ -231,17 +367,20 @@
 
                     <!-- Birthday -->
                     <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:hint="Birthday (YYYY-MM-DD)"
-                        app:boxBackgroundColor="?attr/colorSurface"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="@color/coffee"
+                        app:endIconDrawable="@drawable/ic_calendar"
                         app:endIconMode="custom"
-                        app:hintTextColor="#757575">
+                        app:endIconTint="@color/coffee"
+                        app:hintTextColor="@color/coffee">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputBirthday"
@@ -257,21 +396,23 @@
                         android:id="@+id/genderGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="16dp"
                         android:orientation="horizontal">
 
                         <RadioButton
                             android:id="@+id/radioMale"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:buttonTint="@color/coffee"
                             android:text="Male" />
 
                         <RadioButton
                             android:id="@+id/radioFemale"
                             android:layout_width="0dp"
-                            android:layout_weight="1"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:buttonTint="@color/coffee"
                             android:text="Female" />
                     </RadioGroup>
 
@@ -279,47 +420,47 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSaveProfile"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
+                        android:layout_height="56dp"
                         android:layout_marginTop="24dp"
-                        android:textColor="?android:attr/textColorPrimary"
+                        android:backgroundTint="@color/coffee"
                         android:text="Save Changes"
+                        android:textColor="@color/white"
                         android:textSize="16sp"
-                        app:cornerRadius="12dp" />
+                        app:cornerRadius="14dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Quick Actions Card -->
+            <!-- ===== Quick Actions ===== -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.06"
+                android:text="@string/profile_shortcuts_title"
+                android:textColor="#9E9E9E"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardShortcuts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
-                app:cardUseCompatPadding="false">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp"
-                        android:text="@string/profile_shortcuts_title"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.divider.MaterialDivider
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="8dp"
-                        app:dividerColor="#E0E0E0" />
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
 
                     <LinearLayout
                         android:id="@+id/layoutNotifications"
@@ -329,23 +470,22 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="72dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp">
+                        android:minHeight="64dp"
+                        android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center">
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle">
 
                             <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@string/profile_notifications_cd"
                                 android:src="@drawable/ic_notifications"
-                                app:tint="#FF9800" />
-                        </LinearLayout>
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -359,7 +499,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/profile_notifications_title"
                                 android:textColor="?android:attr/textColorPrimary"
-                                android:textSize="16sp"
+                                android:textSize="15sp"
                                 android:textStyle="bold" />
 
                             <TextView
@@ -368,23 +508,22 @@
                                 android:layout_marginTop="2dp"
                                 android:text="@string/profile_notifications_subtitle"
                                 android:textColor="#9E9E9E"
-                                android:textSize="13sp" />
+                                android:textSize="12sp" />
                         </LinearLayout>
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
                             app:tint="#BDBDBD" />
                     </LinearLayout>
 
-                    <com.google.android.material.divider.MaterialDivider
+                    <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        app:dividerColor="#E0E0E0" />
+                        android:layout_marginStart="56dp"
+                        android:background="@color/hairline" />
 
                     <LinearLayout
                         android:id="@+id/layoutSavedRewards"
@@ -394,23 +533,22 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="72dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp">
+                        android:minHeight="64dp"
+                        android:orientation="horizontal">
 
-                        <LinearLayout
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:gravity="center">
+                        <FrameLayout
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@drawable/bg_icon_circle">
 
                             <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@string/profile_saved_rewards_cd"
                                 android:src="@drawable/ic_star"
-                                app:tint="#FFC107" />
-                        </LinearLayout>
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
                             android:layout_width="0dp"
@@ -419,12 +557,12 @@
                             android:layout_weight="1"
                             android:text="@string/profile_saved_rewards_title"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="16sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
                             app:tint="#BDBDBD" />
@@ -432,31 +570,36 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Support Section -->
+            <!-- ===== Support & legal ===== -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.06"
                 android:text="@string/profile_support_title"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="14sp"
+                android:textColor="#9E9E9E"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
-                app:cardUseCompatPadding="false">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp">
 
                     <LinearLayout
                         android:id="@+id/layoutHelp"
@@ -466,23 +609,22 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="64dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp">
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
 
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:gravity="center">
+                            android:background="@drawable/bg_icon_circle">
 
                             <ImageView
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@string/profile_help_cd"
                                 android:src="@drawable/ic_document"
-                                app:tint="?android:attr/textColorPrimary" />
-                        </LinearLayout>
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
                             android:layout_width="0dp"
@@ -491,8 +633,7 @@
                             android:layout_weight="1"
                             android:text="@string/profile_help_title"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp" />
 
                         <ImageView
                             android:layout_width="20dp"
@@ -502,11 +643,11 @@
                             app:tint="#BDBDBD" />
                     </LinearLayout>
 
-                    <com.google.android.material.divider.MaterialDivider
+                    <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="68dp"
-                        app:dividerColor="#E0E0E0" />
+                        android:layout_marginStart="56dp"
+                        android:background="@color/hairline" />
 
                     <LinearLayout
                         android:id="@+id/layoutTerms"
@@ -516,24 +657,22 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="64dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp">
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
 
-
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:gravity="center">
+                            android:background="@drawable/bg_icon_circle">
 
                             <ImageView
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@string/profile_help_cd"
                                 android:src="@drawable/ic_document"
-                                app:tint="?android:attr/textColorPrimary"  />
-                        </LinearLayout>
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
                             android:layout_width="0dp"
@@ -542,8 +681,7 @@
                             android:layout_weight="1"
                             android:text="@string/profile_terms_title"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp" />
 
                         <ImageView
                             android:layout_width="20dp"
@@ -553,11 +691,11 @@
                             app:tint="#BDBDBD" />
                     </LinearLayout>
 
-                    <com.google.android.material.divider.MaterialDivider
+                    <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="68dp"
-                        app:dividerColor="#E0E0E0" />
+                        android:layout_marginStart="56dp"
+                        android:background="@color/hairline" />
 
                     <LinearLayout
                         android:id="@+id/layoutPrivacy"
@@ -567,24 +705,22 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
-                        android:minHeight="64dp"
-                        android:orientation="horizontal"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp">
+                        android:minHeight="60dp"
+                        android:orientation="horizontal">
 
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:gravity="center">
+                            android:background="@drawable/bg_icon_circle">
 
                             <ImageView
                                 android:layout_width="20dp"
                                 android:layout_height="20dp"
+                                android:layout_gravity="center"
                                 android:contentDescription="@string/profile_help_cd"
                                 android:src="@drawable/ic_document"
-                                app:tint="?android:attr/textColorPrimary" />
-                        </LinearLayout>
-
+                                app:tint="@color/coffee" />
+                        </FrameLayout>
 
                         <TextView
                             android:layout_width="0dp"
@@ -593,8 +729,7 @@
                             android:layout_weight="1"
                             android:text="@string/profile_privacy_title"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
+                            android:textSize="15sp" />
 
                         <ImageView
                             android:layout_width="20dp"
@@ -606,41 +741,41 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Sign Out Card -->
+            <!-- ===== Sign Out ===== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/layoutSignOut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
                 app:cardBackgroundColor="?attr/colorSurface"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="3dp"
-                android:layout_marginBottom="10dp"
-                app:cardUseCompatPadding="false">
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/hairline"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="64dp"
-                    android:orientation="horizontal"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/profile_sign_out"
-                        android:textColor="#D32F2F"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                    android:gravity="center"
+                    android:minHeight="60dp"
+                    android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:contentDescription="@string/profile_item_action_cd"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#D32F2F" />
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="10dp"
+                        android:contentDescription="@string/profile_sign_out"
+                        android:src="@drawable/ic_lock_power_off"
+                        app:tint="@color/signOutRed" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_sign_out"
+                        android:textColor="@color/signOutRed"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

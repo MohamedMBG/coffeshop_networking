@@ -7,4 +7,11 @@
 
     <!-- Dark mode: almost black, like Instagram -->
     <color name="statusBarDark">#121212</color>
+
+    <!-- BeanLoyal accent (coffee) -->
+    <color name="coffee">#6F4E37</color>
+    <color name="coffeeDark">#4E3629</color>
+    <color name="coffeeSoft">#F3ECE5</color>
+    <color name="signOutRed">#D32F2F</color>
+    <color name="hairline">#1F000000</color>
 </resources>
