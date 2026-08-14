@@ -22,7 +22,7 @@ android {
         buildConfigField(
             "String",
             "API_BASE_URL",
-            "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
+            "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
         )
     }
 
@@ -32,7 +32,7 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
+                "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
             )
         }
         release {
@@ -49,7 +49,7 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                "\"https://email-api-git-main-programmingmbmy-3449s-projects.vercel.app/\""
+                "\"https://bean-backend-ejzg.onrender.com/api/v1/\""
             )
         }
     }
