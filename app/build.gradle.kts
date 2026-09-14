@@ -1,16 +1,33 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
 }
 
+// Release signing credentials live in keystore.properties at the repo root, which is
+// git-ignored (the keystore itself must never be committed). When the file is absent —
+// CI, a fresh clone — the release build still assembles, just unsigned.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+
 android {
     namespace = "com.example.loyaltyapp"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.loyaltyapp"
+        // Play rejects com.example.*, and applicationId is immutable once published.
+        // Decoupled from `namespace` on purpose: the Java sources keep their original
+        // package, only the shipped identity changes. The matching client must exist
+        // in google-services.json or the Google Services plugin fails the build.
+        applicationId = "com.beanloyal.customer"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
+        // Must increase on every Play upload; Play rejects a versionCode it has seen before.
         versionCode = 1
         versionName = "1.0"
 
@@ -26,6 +43,17 @@ android {
         )
     }
 
+    signingConfigs {
+        if (keystorePropertiesFile.exists()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
@@ -36,6 +64,7 @@ android {
             )
         }
         release {
+            signingConfig = signingConfigs.findByName("release")
             // P1: enable R8 + resource shrinking for release builds. Keeps the
             // APK smaller and strips unreachable code. Proguard rules for the
             // Firebase / Retrofit / Glide / ZXing reflection paths live in
@@ -98,6 +127,4 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    //firebase admin sdk
-    implementation("com.google.firebase:firebase-admin:9.3.0")
 }

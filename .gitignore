@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Release signing material — supplied out-of-band, never commit
+/keystore.properties
+*.jks
+*.keystore
+
+# Firestore rules emulator suite dependencies — restore with `npm ci`
+/tests/firestore/node_modules/
