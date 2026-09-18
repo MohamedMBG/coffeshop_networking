@@ -20,11 +20,11 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        // Play rejects com.example.*, and applicationId is immutable once published.
-        // Decoupled from `namespace` on purpose: the Java sources keep their original
-        // package, only the shipped identity changes. The matching client must exist
-        // in google-services.json or the Google Services plugin fails the build.
-        applicationId = "com.beanloyal.customer"
+        // Stays com.example.loyaltyapp because that is the only Android client in
+        // google-services.json; any other value fails :app:processDebugGoogleServices.
+        // Play rejects com.example.* uploads, so a publishable id requires registering
+        // the new package in the Firebase project and refreshing google-services.json.
+        applicationId = "com.example.loyaltyapp"
         minSdk = 24
         targetSdk = 36
         // Must increase on every Play upload; Play rejects a versionCode it has seen before.
