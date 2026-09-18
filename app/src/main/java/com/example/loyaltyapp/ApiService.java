@@ -15,6 +15,22 @@ import retrofit2.http.POST;
  */
 public interface ApiService {
 
+    @retrofit2.http.GET("rewards/redeem/pending")
+    Call<ApiResponse<PendingRewardResult>> pendingReward();
+
+    class PendingRewardResult {
+        public PendingReward pending;
+    }
+
+    class PendingReward {
+        public String code;
+        public String rewardId;
+        public String rewardName;
+        public int cost;
+        public String status;
+        public long expiresAtEpochMs;
+    }
+
     // ---- Backend contract (typed) ------------------------------------------
 
     @POST("loyalty/earn")
@@ -136,17 +152,17 @@ public interface ApiService {
         public long categoryScore;
     }
 
-    // ---- Legacy (no backend route; removed in Step 3 once callers migrate) --
+    // ---- Email sign-in (served by EmailAuthController on the Spring backend) --
 
-    @Deprecated
-    @POST("api/register")
+    /** Mails a single-use link bound to the SHA-256 challenge of a device-held verifier. */
+    @POST("auth/register")
     Call<Map<String, Object>> registerEmail(@Body Map<String, String> body);
 
-    @Deprecated
-    @POST("api/verify")
+    /** Trades the emailed token plus the device verifier for a Firebase custom token. */
+    @POST("auth/verify")
     Call<VerifyResponse> verifyToken(@Body Map<String, String> body);
 
-    // Plain POJO for legacy /verify
+    // Plain POJO for /auth/verify
     class VerifyResponse {
         public boolean ok;
         public String email;
