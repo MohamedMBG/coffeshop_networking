@@ -15,11 +15,11 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="#F5F5F5"
+            android:backgroundTint="@color/surface_muted"
             android:elevation="4dp"
             app:title="@string/profile_title"
             app:titleCentered="true"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="@color/text_primary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -102,7 +102,7 @@
                         android:layout_height="1dp"
                         android:layout_marginTop="20dp"
                         android:layout_marginBottom="20dp"
-                        app:dividerColor="#E0E0E0" />
+                        app:dividerColor="@color/outline" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -171,7 +171,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
-                        app:hintTextColor="#757575">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputFullName"
@@ -193,7 +193,7 @@
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="#757575"
+                        app:hintTextColor="@color/text_secondary"
                         app:prefixText="+212 ">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -217,7 +217,7 @@
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
                         app:endIconMode="clear_text"
-                        app:hintTextColor="#757575">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputAddress"
@@ -241,7 +241,7 @@
                         app:boxCornerRadiusTopEnd="12dp"
                         app:boxCornerRadiusTopStart="12dp"
                         app:endIconMode="custom"
-                        app:hintTextColor="#757575">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/inputBirthday"
@@ -319,7 +319,7 @@
                         android:layout_height="1dp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        app:dividerColor="#E0E0E0" />
+                        app:dividerColor="@color/outline" />
 
                     <LinearLayout
                         android:id="@+id/layoutNotifications"
@@ -344,7 +344,7 @@
                                 android:layout_height="24dp"
                                 android:contentDescription="@string/profile_notifications_cd"
                                 android:src="@drawable/ic_notifications"
-                                app:tint="#FF9800" />
+                                app:tint="@color/status_bonus" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -367,7 +367,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
                                 android:text="@string/profile_notifications_subtitle"
-                                android:textColor="#9E9E9E"
+                                android:textColor="@color/text_tertiary"
                                 android:textSize="13sp" />
                         </LinearLayout>
 
@@ -376,7 +376,7 @@
                             android:layout_height="24dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
-                            app:tint="#BDBDBD" />
+                            app:tint="@color/icon_muted" />
                     </LinearLayout>
 
                     <com.google.android.material.divider.MaterialDivider
@@ -384,7 +384,7 @@
                         android:layout_height="1dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
-                        app:dividerColor="#E0E0E0" />
+                        app:dividerColor="@color/outline" />
 
                     <LinearLayout
                         android:id="@+id/layoutSavedRewards"
@@ -409,7 +409,7 @@
                                 android:layout_height="24dp"
                                 android:contentDescription="@string/profile_saved_rewards_cd"
                                 android:src="@drawable/ic_star"
-                                app:tint="#FFC107" />
+                                app:tint="@color/brand_gold" />
                         </LinearLayout>
 
                         <TextView
@@ -427,7 +427,7 @@
                             android:layout_height="24dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
-                            app:tint="#BDBDBD" />
+                            app:tint="@color/icon_muted" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -499,14 +499,14 @@
                             android:layout_height="20dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
-                            app:tint="#BDBDBD" />
+                            app:tint="@color/icon_muted" />
                     </LinearLayout>
 
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginStart="68dp"
-                        app:dividerColor="#E0E0E0" />
+                        app:dividerColor="@color/outline" />
 
                     <LinearLayout
                         android:id="@+id/layoutTerms"
@@ -550,14 +550,14 @@
                             android:layout_height="20dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
-                            app:tint="#BDBDBD" />
+                            app:tint="@color/icon_muted" />
                     </LinearLayout>
 
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
                         android:layout_marginStart="68dp"
-                        app:dividerColor="#E0E0E0" />
+                        app:dividerColor="@color/outline" />
 
                     <LinearLayout
                         android:id="@+id/layoutPrivacy"
@@ -601,7 +601,7 @@
                             android:layout_height="20dp"
                             android:contentDescription="@string/profile_item_action_cd"
                             android:src="@drawable/ic_chevron_right"
-                            app:tint="#BDBDBD" />
+                            app:tint="@color/icon_muted" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -631,7 +631,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/profile_sign_out"
-                        android:textColor="#D32F2F"
+                        android:textColor="@color/status_error"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
@@ -640,7 +640,7 @@
                         android:layout_height="24dp"
                         android:contentDescription="@string/profile_item_action_cd"
                         android:src="@drawable/ic_chevron_right"
-                        app:tint="#D32F2F" />
+                        app:tint="@color/status_error" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

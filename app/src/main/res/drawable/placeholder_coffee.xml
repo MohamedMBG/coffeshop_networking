@@ -7,29 +7,29 @@
 
     <!-- Background -->
     <path
-        android:fillColor="#F5F5F5"
+        android:fillColor="@color/surface_muted"
         android:pathData="M0,0h100v100h-100z"/>
 
     <!-- Coffee Cup Body -->
     <path
-        android:fillColor="#8B5A3C"
+        android:fillColor="@color/brand_primary"
         android:pathData="M30,35 L35,65 C35,68 37,70 40,70 L60,70 C63,70 65,68 65,65 L70,35 Z"/>
 
     <!-- Coffee Cup Rim -->
     <path
-        android:fillColor="#A67C52"
+        android:fillColor="@color/brand_tertiary"
         android:pathData="M28,35 L72,35 L70,38 L30,38 Z"/>
 
     <!-- Cup Handle -->
     <path
-        android:fillColor="#8B5A3C"
+        android:fillColor="@color/brand_primary"
         android:pathData="M70,40 Q80,40 80,50 Q80,60 70,60"
-        android:strokeColor="#8B5A3C"
+        android:strokeColor="@color/brand_primary"
         android:strokeWidth="3" />
 
     <!-- Steam Line 1 -->
     <path
-        android:strokeColor="#BDBDBD"
+        android:strokeColor="@color/icon_muted"
         android:strokeWidth="2"
         android:strokeLineCap="round"
         android:pathData="M40,25 Q42,20 40,15"
@@ -37,7 +37,7 @@
 
     <!-- Steam Line 2 -->
     <path
-        android:strokeColor="#BDBDBD"
+        android:strokeColor="@color/icon_muted"
         android:strokeWidth="2"
         android:strokeLineCap="round"
         android:pathData="M50,28 Q52,23 50,18"
@@ -45,7 +45,7 @@
 
     <!-- Steam Line 3 -->
     <path
-        android:strokeColor="#BDBDBD"
+        android:strokeColor="@color/icon_muted"
         android:strokeWidth="2"
         android:strokeLineCap="round"
         android:pathData="M60,25 Q62,20 60,15"
@@ -53,6 +53,6 @@
 
     <!-- Coffee Surface (inside cup) -->
     <path
-        android:fillColor="#6B4423"
+        android:fillColor="@color/brand_primary_dark"
         android:pathData="M32,38 L35,40 L65,40 L68,38 Z"/>
 </vector>

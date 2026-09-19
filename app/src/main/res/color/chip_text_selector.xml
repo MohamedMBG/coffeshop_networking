@@ -2,9 +2,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Selected → WHITE -->
-    <item android:color="@android:color/white" android:state_checked="true"/>
+    <item android:color="@color/brand_on_primary" android:state_checked="true"/>
 
     <!-- Unselected → slightly faded / theme-aware -->
-    <item android:color="#A6A6A6"/>
+    <item android:color="@color/text_tertiary"/>
 
 </selector>

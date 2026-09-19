@@ -5,8 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="@color/white"
-    android:background="@color/white"
+    android:backgroundTint="?attr/colorSurface"
+    android:background="?attr/colorSurface"
     tools:context=".SignUpActivity">
 
     <LinearLayout
@@ -26,14 +26,14 @@
             android:layout_height="65dp"
             android:src="@drawable/logo"
             android:layout_marginBottom="12dp"
-            app:tint="#8B4513" />
+            app:tint="@color/brand_primary" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/b_b_coffee_shop"
-            android:textColor="#2C2C2C"
+            android:textColor="@color/text_primary"
             android:textStyle="bold"
             android:textSize="28sp"
             android:letterSpacing="0.02" />
@@ -80,7 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email Address"
-            android:textColor="#2C2C2C"
+            android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"
@@ -93,7 +93,7 @@
             android:layout_margin="4dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/surface_card">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -113,8 +113,8 @@
                     android:padding="16dp"
                     android:background="@android:color/transparent"
                     android:textSize="16sp"
-                    android:textColor="#2C2C2C"
-                    android:textColorHint="#999999" />
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_tertiary" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -126,12 +126,12 @@
             android:layout_margin="4dp"
             android:layout_marginTop="24dp"
             android:text="Continue"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/brand_on_primary"
             android:textSize="16sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"
             app:cornerRadius="12dp"
-            app:backgroundTint="#8B4513" />
+            app:backgroundTint="@color/brand_primary" />
 
     </LinearLayout>
 
@@ -162,7 +162,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="#E0E0E0" />
+                android:background="@color/outline" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -170,7 +170,7 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="OR"
-                android:textColor="#999999"
+                android:textColor="@color/text_tertiary"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -178,7 +178,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
-                android:background="#E0E0E0" />
+                android:background="@color/outline" />
         </LinearLayout>
 
         <!-- Guest Button -->
@@ -187,10 +187,10 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Continue as Guest"
-            android:backgroundTint="#EFEFEF"
+            android:backgroundTint="@color/surface_muted"
             app:cornerRadius="12dp"
-            android:textColor="@color/black"
-            app:strokeColor="#E0E0E0"
+            android:textColor="@color/text_primary"
+            app:strokeColor="@color/outline"
             app:strokeWidth="1dp"/>
 
 
@@ -203,7 +203,7 @@
             android:paddingStart="32dp"
             android:paddingEnd="32dp"
             android:text="By continuing, you agree to our Terms &amp; Privacy Policy"
-            android:textColor="#999999"
+            android:textColor="@color/text_tertiary"
             android:textSize="8sp" />
 
     </LinearLayout>

@@ -1,16 +1,57 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.LoyaltyApp" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <item name="colorPrimary">#DEDEDE</item>
-        <!-- Status bar for LIGHT mode -->
-        <item name="android:statusBarColor">@color/statusBarLight</item>
-        <!-- Dark icons on light background -->
-        <item name="android:windowLightStatusBar">true</item>
 
+    <!--
+      Base application theme.
+
+      The Material 3 colour roles are all bound to tokens from colors.xml, so
+      views that use ?attr/colorSurface, ?attr/colorPrimary, textColorPrimary
+      and friends pick up the brand automatically - including in dark theme,
+      where values-night/colors.xml swaps the token values underneath.
+    -->
+    <style name="Base.Theme.LoyaltyApp" parent="Theme.Material3.DayNight.NoActionBar">
+
+        <!-- Brand -->
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/brand_on_primary</item>
+        <item name="colorPrimaryContainer">@color/brand_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/brand_on_primary_container</item>
+        <item name="colorSecondary">@color/brand_accent</item>
+        <item name="colorOnSecondary">@color/brand_on_accent</item>
+        <item name="colorSecondaryContainer">@color/brand_primary_container</item>
+        <item name="colorOnSecondaryContainer">@color/brand_on_primary_container</item>
+        <item name="colorTertiary">@color/brand_tertiary</item>
+        <item name="colorOnTertiary">@color/brand_on_primary</item>
+
+        <!-- Surfaces -->
+        <item name="android:colorBackground">@color/surface</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorSurfaceVariant">@color/surface_container</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/outline</item>
+
+        <!-- Status -->
+        <item name="colorError">@color/status_error</item>
+        <item name="colorOnError">@color/on_status</item>
+        <item name="colorErrorContainer">@color/status_error_container</item>
+        <item name="colorOnErrorContainer">@color/status_error_strong</item>
+
+        <!-- Text -->
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorTertiary">@color/text_tertiary</item>
+        <item name="android:textColorHint">@color/text_tertiary</item>
+
+        <!-- System bars follow the window surface instead of a fixed grey -->
+        <item name="android:statusBarColor">@color/surface</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <!-- Dark icons on the light surface -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.LoyaltyApp" parent="Base.Theme.LoyaltyApp" />
+
     <style name="BottomNavTextActive" parent="TextAppearance.AppCompat.Caption">
         <item name="android:textSize">12sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>

@@ -4,14 +4,14 @@
     android:padding="32dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/surface_container">
 
     <!-- Icon placeholder using TextView as shape -->
     <TextView
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:background="@android:drawable/ic_dialog_alert"
-        android:backgroundTint="#E53935"
+        android:backgroundTint="@color/status_error"
         android:layout_marginBottom="24dp"/>
 
     <!-- Title -->
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:text="Application Disabled"
         android:textSize="24sp"
-        android:textColor="#212121"
+        android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginBottom="12dp"/>
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:text="This application is temporarily unavailable. Please contact support for more information."
         android:textSize="14sp"
-        android:textColor="#757575"
+        android:textColor="@color/text_secondary"
         android:gravity="center"
         android:lineSpacingExtra="4dp"
         android:layout_marginBottom="32dp"/>
@@ -44,8 +44,8 @@
         android:layout_height="wrap_content"
         android:text="Contact Support"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#1976D2"
+        android:textColor="@color/on_status"
+        android:backgroundTint="@color/status_info"
         android:paddingVertical="14dp"
         android:layout_marginBottom="12dp"
         android:textAllCaps="false"/>
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:text="Quit"
         android:textSize="16sp"
-        android:textColor="#757575"
+        android:textColor="@color/text_secondary"
         android:background="@android:color/transparent"
         android:paddingVertical="14dp"
         android:textAllCaps="false"

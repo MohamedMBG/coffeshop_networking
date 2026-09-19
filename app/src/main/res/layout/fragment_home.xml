@@ -100,7 +100,7 @@
                         android:background="@drawable/badge_background"
                         android:gravity="center"
                         android:text="0"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/on_status"
                         android:textSize="12sp"
                         android:textStyle="bold"
                         android:visibility="gone"/>
@@ -170,7 +170,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="On all coffee drinks today!"
-                            android:textColor="#FFEBEE"
+                            android:textColor="@color/on_brand_muted_fixed"
                             android:textSize="14sp"
                             android:layout_marginTop="4dp"/>
                     </LinearLayout>
@@ -285,9 +285,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="All"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/brand_on_primary"
                         android:layout_marginEnd="8dp"
-                        app:chipBackgroundColor="#8B5A3C"
+                        app:chipBackgroundColor="@color/brand_primary"
                         app:chipCornerRadius="20dp"/>
 
                     <com.google.android.material.chip.Chip

@@ -78,12 +78,23 @@ public class RewardsFragment extends Fragment {
 
         recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
         recycler.setNestedScrollingEnabled(false);
-        adapter = new RewardAdapter(() -> userPoints, this::onRedeemClicked);
+        adapter = new RewardAdapter(() -> viewModel != null
+                && Boolean.TRUE.equals(viewModel.getIsMutating().getValue()) ? -1 : userPoints,
+                this::onRedeemClicked);
         recycler.setAdapter(adapter);
         
         viewModel = new androidx.lifecycle.ViewModelProvider(this).get(RewardsViewModel.class);
+        com.google.firebase.auth.FirebaseUser currentUser =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        viewModel.init(currentUser == null ? null : currentUser.getUid());
 
         swipeRefresh.setOnRefreshListener(() -> viewModel.refresh());
+        binding.btnMyRewards.setOnClickListener(button -> viewModel.recoverPendingReward(true));
+        viewModel.getCheckingPending().observe(getViewLifecycleOwner(), checking -> {
+            binding.btnMyRewards.setEnabled(!Boolean.TRUE.equals(checking)
+                    && !Boolean.TRUE.equals(viewModel.getIsMutating().getValue()));
+            binding.btnMyRewards.setText(Boolean.TRUE.equals(checking) ? "Checking…" : "My Rewards");
+        });
 
         chipGroup.setOnCheckedStateChangeListener((group, ids) -> {
             if (ids.isEmpty()) {
@@ -112,21 +123,33 @@ public class RewardsFragment extends Fragment {
         });
 
         viewModel.getRedemptionState().observe(getViewLifecycleOwner(), event -> {
+            if (isHidden() || getParentFragmentManager().isStateSaved()) return;
             RewardsViewModel.RedemptionState state =
                     event == null ? null : event.getContentIfNotHandled();
             if (state == null) return; // already handled or no event
+            androidx.fragment.app.Fragment existing = getParentFragmentManager().findFragmentByTag("redeem_code");
+            if (state.isSuccess && existing instanceof com.example.loyaltyapp.RedeemCodeDialog) {
+                ((com.example.loyaltyapp.RedeemCodeDialog) existing).dismiss();
+            }
             if (state.isSuccess && state.code != null) {
                 // Backend deducted the points and issued a pending code; show it
                 // as a QR for the cashier to scan.
-                com.example.loyaltyapp.RedeemCodeDialog
-                        .newInstance(state.code, state.expiresAtEpochMs)
-                        .show(getParentFragmentManager(), "redeem_code");
+                if (!getParentFragmentManager().isStateSaved()) {
+                    com.example.loyaltyapp.RedeemCodeDialog
+                            .newInstance(state.code, state.expiresAtEpochMs)
+                            .show(getParentFragmentManager(), "redeem_code");
+                }
             } else if (state.error != null) {
                 Toast.makeText(requireContext(), "Redeem failed: " + state.error, Toast.LENGTH_LONG).show();
             }
         });
         
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), this::showLoading);
+        viewModel.getIsMutating().observe(getViewLifecycleOwner(), busy -> {
+            if (adapter != null) adapter.notifyDataSetChanged();
+            binding.btnMyRewards.setEnabled(!Boolean.TRUE.equals(busy)
+                    && !Boolean.TRUE.equals(viewModel.getCheckingPending().getValue()));
+        });
 
         viewModel.getErrorMessage().observe(getViewLifecycleOwner(), msg -> {
             if (msg != null && !msg.isEmpty()) {
@@ -154,9 +177,7 @@ public class RewardsFragment extends Fragment {
 
     private void updateHeader(int points) {
         tvPointsHeader.setText(points + " points");
-        progressToNext.setProgress(0);
-        tvNextRewardInfo.setText("");
-        // We calculate remaining points based on cheapest reward inside applyRewardsList now
+        updateProgress(viewModel.getRewards().getValue());
     }
     
     private void applyRewardsList(List<Rewards> list) {
@@ -164,8 +185,11 @@ public class RewardsFragment extends Fragment {
         
         adapter.submitList(list);
         emptyState.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+        updateProgress(list);
+    }
 
-        if (!list.isEmpty()) {
+    private void updateProgress(List<Rewards> list) {
+        if (list != null && !list.isEmpty()) {
             int cheapest = list.get(0).redeemPoints;
             for (Rewards r : list) {
                 if (r.redeemPoints < cheapest) cheapest = r.redeemPoints;
@@ -189,6 +213,7 @@ public class RewardsFragment extends Fragment {
     // code shown as a QR (see the redemptionState observer). The cashier scans
     // that code to complete the spend — the client never mutates points.
     private void onRedeemClicked(@NonNull Rewards r) {
+        if (Boolean.TRUE.equals(viewModel.getIsMutating().getValue())) return;
         if (userPoints < r.redeemPoints) {
             Toast.makeText(requireContext(), "Not enough points yet", Toast.LENGTH_SHORT).show();
             return;
@@ -202,6 +227,24 @@ public class RewardsFragment extends Fragment {
     private void showLoading(boolean show) {
         swipeRefresh.setRefreshing(false);
         loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (!isHidden()) recoverPending();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && binding != null && isResumed()) recoverPending();
+    }
+
+    private void recoverPending() {
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        viewModel.init(user == null ? null : user.getUid());
+        viewModel.recoverPendingReward(false);
     }
 
     @Override

@@ -21,7 +21,12 @@ public class ApiClient {
             OkHttpClient http = new OkHttpClient.Builder()
                     .addInterceptor(new AuthInterceptor())
                     .connectTimeout(15, TimeUnit.SECONDS)
-                    .readTimeout(25, TimeUnit.SECONDS)
+                    // The backend runs on an instance that sleeps when idle and takes up to ~80s
+                    // to answer the first request after waking. A 25s read timeout turned that
+                    // wake-up into "Could not connect" on the first sign-in of the day, so the
+                    // read budget covers a cold start instead. The connect timeout stays short:
+                    // a genuinely unreachable host still fails fast.
+                    .readTimeout(90, TimeUnit.SECONDS)
                     .writeTimeout(25, TimeUnit.SECONDS)
                     .build();
             retrofit = new Retrofit.Builder()

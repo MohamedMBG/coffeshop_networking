@@ -7,7 +7,7 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="4dp"
-                android:color="#8B5A3C"/>
+                android:color="@color/scan_accent_fixed"/>
             <size
                 android:width="40dp"
                 android:height="40dp"/>
@@ -23,7 +23,7 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="4dp"
-                android:color="#8B5A3C"/>
+                android:color="@color/scan_accent_fixed"/>
             <size
                 android:width="40dp"
                 android:height="40dp"/>
@@ -39,7 +39,7 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="4dp"
-                android:color="#8B5A3C"/>
+                android:color="@color/scan_accent_fixed"/>
             <size
                 android:width="40dp"
                 android:height="40dp"/>
@@ -55,7 +55,7 @@
         <shape android:shape="rectangle">
             <stroke
                 android:width="4dp"
-                android:color="#8B5A3C"/>
+                android:color="@color/scan_accent_fixed"/>
             <size
                 android:width="40dp"
                 android:height="40dp"/>

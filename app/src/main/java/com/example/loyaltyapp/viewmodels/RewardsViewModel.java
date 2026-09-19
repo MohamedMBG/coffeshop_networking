@@ -20,6 +20,8 @@ public class RewardsViewModel extends ViewModel {
 
     private final MutableLiveData<List<Rewards>> rewardsList = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    // Catalog loading must not unlock a balance-changing request already in flight.
+    private final MutableLiveData<Boolean> isMutating = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     // One-time signals (Event) so a config change doesn't re-fire the dialog/toast.
     private final MutableLiveData<Event<RedemptionState>> redemptionState = new MutableLiveData<>();
@@ -36,11 +38,46 @@ public class RewardsViewModel extends ViewModel {
     private final Observer<User> userObserver = new Observer<User>() {
         @Override
         public void onChanged(User user) {
-            userPoints.postValue(user != null ? user.getPoints() : 0);
+            userPoints.setValue(user != null ? user.getPoints() : 0);
         }
     };
 
     private String activeFilter = "all";
+    private String currentUid;
+    private long pendingGeneration;
+    private final MutableLiveData<Boolean> checkingPending = new MutableLiveData<>(false);
+
+    public LiveData<Boolean> getCheckingPending() { return checkingPending; }
+
+    public void recoverPendingReward(boolean userRequested) {
+        if (currentUid == null || Boolean.TRUE.equals(isMutating.getValue())) return;
+        final String requestUid = currentUid;
+        final long generation = ++pendingGeneration;
+        checkingPending.setValue(true);
+        rewardsRepo.pendingReward(new RewardsRepository.PendingCallback() {
+            @Override
+            public void onSuccess(com.example.loyaltyapp.ApiService.PendingReward pending) {
+                if (generation != pendingGeneration || !requestUid.equals(currentUid)) return;
+                checkingPending.setValue(false);
+                redemptionState.setValue(new Event<>(new RedemptionState(true, null, true,
+                        pending == null ? null : pending.code,
+                        pending == null || !"pending".equals(pending.status) ? 0 : pending.expiresAtEpochMs)));
+                if (pending == null && userRequested) errorMessage.setValue("No pending reward. Completed, cancelled, or refunded rewards appear in your activity.");
+            }
+
+            @Override
+            public void onError(String message) {
+                if (generation != pendingGeneration || !requestUid.equals(currentUid)) return;
+                checkingPending.setValue(false);
+                errorMessage.setValue("Could not check your pending reward. Tap My Rewards to retry. " + message);
+            }
+        });
+    }
+
+    private void invalidatePendingLookup() {
+        pendingGeneration++;
+        checkingPending.setValue(false);
+    }
 
     public RewardsViewModel() {
         this(new RewardsRepository(), new UserRepository());
@@ -62,6 +99,10 @@ public class RewardsViewModel extends ViewModel {
 
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
+    }
+
+    public LiveData<Boolean> getIsMutating() {
+        return isMutating;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -93,6 +134,7 @@ public class RewardsViewModel extends ViewModel {
     
     public void refresh() {
         loadRewards();
+        recoverPendingReward(false);
     }
 
     private void loadRewards() {
@@ -113,12 +155,25 @@ public class RewardsViewModel extends ViewModel {
     }
 
     public void redeemReward(Rewards reward) {
-        isLoading.setValue(true);
+        if (Boolean.TRUE.equals(isMutating.getValue())) return;
+        if (currentUid == null) {
+            errorMessage.setValue("Please sign in again.");
+            return;
+        }
+        if (reward == null || reward.id == null || reward.id.trim().isEmpty()) {
+            errorMessage.setValue("This reward is unavailable. Refresh and try again.");
+            return;
+        }
+        final String requestUid = currentUid;
+        invalidatePendingLookup();
+        isMutating.setValue(true);
 
         rewardsRepo.redeem(reward.id, new RewardsRepository.RedeemCallback() {
             @Override
             public void onSuccess(String code, long expiresAtEpochMs, int totalPoints) {
-                isLoading.postValue(false);
+                if (!requestUid.equals(currentUid)) return;
+                isMutating.setValue(false);
+                userPoints.setValue(totalPoints);
                 // Carry the pending code + expiry so the fragment can show a QR
                 // with a countdown for the cashier to scan.
                 redemptionState.postValue(new Event<>(
@@ -127,43 +182,72 @@ public class RewardsViewModel extends ViewModel {
 
             @Override
             public void onError(String message) {
-                isLoading.postValue(false);
-                errorMessage.postValue(message);
+                if (!requestUid.equals(currentUid)) return;
+                isMutating.setValue(false);
                 redemptionState.postValue(new Event<>(
                         new RedemptionState(true, message, false, null, 0L)));
+                recoverPendingReward(false);
             }
         });
     }
 
-    /**
-     * Cancel a pending redeem by its code. On success the balance refresh comes
-     * through the users/{uid} snapshot listener; here we just surface the
-     * refunded amount for a confirmation toast. Errors reuse errorMessage.
-     */
+    /** Cancel through the backend, update the balance, and report the refund. */
     public void cancelRedeem(String code) {
+        if (Boolean.TRUE.equals(isMutating.getValue())) return;
+        if (currentUid == null) {
+            errorMessage.setValue("Please sign in again.");
+            return;
+        }
+        if (code == null || code.trim().isEmpty()) {
+            errorMessage.setValue("No reward code to cancel.");
+            return;
+        }
+        final String requestUid = currentUid;
+        invalidatePendingLookup();
+        isMutating.setValue(true);
         rewardsRepo.cancelRedeem(code, new RewardsRepository.CancelCallback() {
             @Override
             public void onSuccess(int refunded, int totalPoints) {
+                if (!requestUid.equals(currentUid)) return;
+                isMutating.setValue(false);
+                userPoints.setValue(totalPoints);
                 cancelRefunded.postValue(new Event<>(refunded));
+                recoverPendingReward(false);
             }
 
             @Override
             public void onError(String message) {
+                if (!requestUid.equals(currentUid)) return;
+                isMutating.setValue(false);
                 errorMessage.postValue(message);
+                recoverPendingReward(false);
             }
         });
     }
 
-    // Call this from Fragment to start listening (UID comes from an Auth ViewModel/Repo ideally,
-    // but for now let's set it if Fragment knows it, or we can add it to UserRepository). 
-    // Let's create an init method.
+    // Calling again after view recreation keeps the existing account listener.
     public void init(String uid) {
-        userRepo.listenToUser(uid, userData);
+        if (uid != null && uid.equals(currentUid)) return;
+        currentUid = uid;
+        invalidatePendingLookup();
+        isMutating.setValue(false);
+        redemptionState.setValue(null);
+        cancelRefunded.setValue(null);
+        errorMessage.setValue(null);
+        userData.setValue(null);
+        if (uid == null || uid.trim().isEmpty()) {
+            currentUid = null;
+            userRepo.cleanup();
+        } else {
+            userRepo.listenToUser(uid, userData);
+        }
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
+        currentUid = null;
+        invalidatePendingLookup();
         // P1: pair the observeForever in the constructor with explicit removal
         // so the ViewModel can be GC'd once the screen is gone.
         userData.removeObserver(userObserver);
