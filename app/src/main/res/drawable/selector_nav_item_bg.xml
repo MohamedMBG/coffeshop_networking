@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Active State: Primary Color Background with 10% Opacity -->
-    <item android:state_checked="true" android:alpha="0.1">
-        <shape android:shape="rectangle">
-            <!-- Reverted from hardcoded Red to dynamic Primary Color -->
-            <solid android:color="#8B5A3C" />
-            <corners android:radius="24dp" />
-        </shape>
+    <!--
+      Active state: tonal brand capsule, inset so it reads as a pill inside the
+      64dp bar rather than filling the whole item cell. The fill must stay
+      opaque - the checked icon/label colour is @color/nav_indicator_content,
+      which needs a solid backdrop to hold its contrast.
+    -->
+    <item android:state_checked="true">
+        <inset
+            android:insetTop="8dp"
+            android:insetBottom="8dp"
+            android:insetLeft="4dp"
+            android:insetRight="4dp">
+            <shape android:shape="rectangle">
+                <solid android:color="@color/nav_indicator" />
+                <corners android:radius="24dp" />
+            </shape>
+        </inset>
     </item>
 
     <!-- Inactive State: Transparent -->

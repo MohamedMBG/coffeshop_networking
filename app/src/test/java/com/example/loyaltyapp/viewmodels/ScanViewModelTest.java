@@ -11,6 +11,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import org.mockito.ArgumentCaptor;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.Observer;
@@ -116,5 +118,24 @@ public class ScanViewModelTest {
         ScanViewModel.ScanState state = viewModel.getScanState().getValue();
         assertNotNull(state);
         assertEquals("This code has expired.", state.errorMsg);
+    }
+
+    @Test
+    public void duplicateScanIsBlockedEvenAfterUiStateIsCleared() {
+        viewModel.processScannedCode("ABCDEFGH23");
+        viewModel.clearState();
+        viewModel.processScannedCode("ABCDEFGH23");
+        verify(mockRepository, times(1)).earn(eq("ABCDEFGH23"), any());
+    }
+
+    @Test
+    public void failedScanUnlocksNextAttempt() {
+        viewModel.processScannedCode("ABCDEFGH23");
+        ArgumentCaptor<ScanRepository.EarnCallback> captor =
+                ArgumentCaptor.forClass(ScanRepository.EarnCallback.class);
+        verify(mockRepository).earn(eq("ABCDEFGH23"), captor.capture());
+        captor.getValue().onError("Offline");
+        viewModel.processScannedCode("ABCDEFGH23");
+        verify(mockRepository, times(2)).earn(eq("ABCDEFGH23"), any());
     }
 }

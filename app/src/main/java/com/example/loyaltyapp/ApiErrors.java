@@ -80,9 +80,16 @@ public final class ApiErrors {
             case "BIRTHDAY_NOT_SET":         return "Add your birthday in your profile first.";
             case "BIRTHDAY_NOT_TODAY":       return "Your birthday reward is only available on your birthday.";
             case "BIRTHDAY_ALREADY_CLAIMED": return "You've already claimed your birthday reward this year.";
+            // email sign-in
+            case "INVALID_EMAIL_LINK":       return "Link expired, already used, or requested on another phone. Request a new email here.";
+            case "SIGNIN_NOT_ALLOWED":       return "This account can't use customer sign-in. Use a different email address.";
+            case "EMAIL_UNAVAILABLE":        return "Email sign-in is unavailable right now. Please try again later.";
             // generic
             case "RATE_LIMITED":             return "Too many requests. Please slow down.";
             case "UNAUTHENTICATED":          return "Please sign in again.";
+            case "AUTH_REQUIRED":
+            case "AUTH_INVALID_TOKEN":
+            case "AUTH_MALFORMED_TOKEN":     return "Please sign in again.";
             default: return serverMessage != null ? serverMessage : "Something went wrong. Please try again.";
         }
     }

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -154,7 +155,8 @@ public class HomeFragment extends Fragment {
 
         if (hasRewardEarned) {
             // Re-style UI slightly to congratulate them!
-            binding.punchCardView.setCardBackgroundColor(0xFFFFF9C4); // Light Yellow to highlight
+            binding.punchCardView.setCardBackgroundColor(
+                    ContextCompat.getColor(requireContext(), R.color.punch_card_highlight));
             binding.tvPunchCardSubtitle.setText(R.string.punch_card_reward_earned_subtitle);
             if (binding.punchCardView.findViewById(R.id.tvPunchCardTitle) != null) {
                 ((android.widget.TextView) binding.punchCardView.findViewById(R.id.tvPunchCardTitle))
@@ -162,7 +164,8 @@ public class HomeFragment extends Fragment {
             }
         } else {
             // Restore normal look
-            binding.punchCardView.setCardBackgroundColor(getResources().getColor(android.R.color.white, null));
+            binding.punchCardView.setCardBackgroundColor(
+                    ContextCompat.getColor(requireContext(), R.color.surface_card));
             int needed = 10 - cupsFilled;
             binding.tvPunchCardSubtitle.setText(getString(R.string.punch_card_needed, needed));
             if (binding.punchCardView.findViewById(R.id.tvPunchCardTitle) != null) {
@@ -196,9 +199,12 @@ public class HomeFragment extends Fragment {
         String badge = getStr(cfg.get("badge"), "Special Offer");
         String title = getStr(cfg.get("title"), "Buy 1 Get 1 Free");
         String subtitle = getStr(cfg.get("subtitle"), "");
-        String textHex = getStr(cfg.get("textColor"), "#FFFFFF");
-        String cStart = getStr(cfg.get("startColor"), "#FF7A00");
-        String cEnd = getStr(cfg.get("endColor"), "#FF3D00");
+        // Remote config may override the banner colours; when it does not, fall
+        // back to the brand caramel gradient from colors.xml rather than the
+        // generic orange this used to hardcode.
+        String textHex = getStr(cfg.get("textColor"), null);
+        String cStart = getStr(cfg.get("startColor"), null);
+        String cEnd = getStr(cfg.get("endColor"), null);
         String iconUrl = getStr(cfg.get("iconUrl"), "");
         int iconVersion = (cfg.get("iconVersion") instanceof Number)
                 ? ((Number) cfg.get("iconVersion")).intValue()
@@ -211,14 +217,17 @@ public class HomeFragment extends Fragment {
         tvBannerSubtitle.setText(subtitle);
 
         // Text color
-        int textColor = safeColor(textHex, Color.WHITE);
+        int textColor = safeColor(textHex,
+                ContextCompat.getColor(requireContext(), R.color.on_brand_fixed));
         tvBannerBadge.setTextColor(textColor);
         tvBannerTitle.setTextColor(textColor);
         tvBannerSubtitle.setTextColor(textColor);
 
         // Dynamic gradient background
-        int start = safeColor(cStart, Color.parseColor("#FF7A00"));
-        int end = safeColor(cEnd, Color.parseColor("#FF3D00"));
+        int start = safeColor(cStart,
+                ContextCompat.getColor(requireContext(), R.color.brand_accent_bright_fixed));
+        int end = safeColor(cEnd,
+                ContextCompat.getColor(requireContext(), R.color.brand_accent_deep_fixed));
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
                 new int[] { start, end });

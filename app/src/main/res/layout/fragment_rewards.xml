@@ -85,8 +85,8 @@
                                 android:textStyle="bold"
                                 style="@style/Widget.Material3.Button.TonalButton"
                                 app:cornerRadius="16dp"
-                                app:backgroundTint="#F5F0EB"
-                                android:textColor="#8B5A3C"/>
+                                app:backgroundTint="@color/brand_primary_container"
+                                android:textColor="@color/brand_primary"/>
                         </LinearLayout>
 
                         <!-- Divider -->
@@ -116,7 +116,7 @@
                                 app:showAnimationBehavior="inward"
                                 app:trackCornerRadius="6dp"
                                 app:trackColor="?android:attr/textColorTertiary"
-                                app:indicatorColor="#8B5A3C"
+                                app:indicatorColor="@color/brand_primary"
                                 android:indeterminate="false"
                                 android:progress="40" />
 
@@ -288,7 +288,7 @@
         android:id="@+id/loadingOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#80000000"
+        android:background="@color/scrim_medium"
         android:visibility="gone"
         android:clickable="true">
 
@@ -297,6 +297,6 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_gravity="center"
-            android:indeterminateTint="#8B5A3C" />
+            android:indeterminateTint="@color/brand_primary" />
     </FrameLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

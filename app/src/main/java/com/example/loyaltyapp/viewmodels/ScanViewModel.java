@@ -25,6 +25,7 @@ public class ScanViewModel extends ViewModel {
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     private final MutableLiveData<ScanState> scanState = new MutableLiveData<>();
+    private boolean requestInFlight;
 
     public ScanViewModel() {
         this(new ScanRepository(), FirebaseAuth.getInstance());
@@ -41,7 +42,10 @@ public class ScanViewModel extends ViewModel {
     }
 
     public void processScannedCode(String rawData) {
-        if (rawData == null || rawData.isEmpty()) {
+        // UI lifecycle resets must not permit another earn request while the
+        // previous scan is still being processed by the backend.
+        if (requestInFlight) return;
+        if (rawData == null || rawData.trim().isEmpty()) {
             postError("Invalid QR Code");
             return;
         }
@@ -54,7 +58,7 @@ public class ScanViewModel extends ViewModel {
 
         // The scanned string is a bare earn code. Backend identifies the user
         // from the auth token, so no uid is passed.
-        executeEarnTransaction(rawData);
+        executeEarnTransaction(rawData.trim());
     }
 
     /**
@@ -63,10 +67,12 @@ public class ScanViewModel extends ViewModel {
      * the result into UI state.
      */
     private void executeEarnTransaction(String code) {
+        requestInFlight = true;
         scanState.setValue(new ScanState(true, null, null, null, false));
         repository.earn(code, new ScanRepository.EarnCallback() {
             @Override
             public void onSuccess(int pointsGranted, int totalPoints, int totalVisits) {
+                requestInFlight = false;
                 // Backend returns no "visit counted" flag, so surface the new
                 // balance instead of the old same-visit/new-visit sub-message.
                 postSuccess("+" + pointsGranted + " Points", "Balance: " + totalPoints + " pts");
@@ -74,6 +80,7 @@ public class ScanViewModel extends ViewModel {
 
             @Override
             public void onError(String message) {
+                requestInFlight = false;
                 postError(message);
             }
         });

@@ -51,6 +51,8 @@
 
 # Our API DTOs (Gson reflects into them).
 -keep class com.example.loyaltyapp.ApiService$* { *; }
+-keep class com.example.loyaltyapp.ApiResponse { *; }
+-keep class com.example.loyaltyapp.ApiError { *; }
 
 # ------------------------------------------------------------
 # Glide

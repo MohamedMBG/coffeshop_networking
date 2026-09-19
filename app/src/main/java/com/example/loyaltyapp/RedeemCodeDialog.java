@@ -37,6 +37,8 @@ public class RedeemCodeDialog extends DialogFragment {
 
     private CountDownTimer timer;
     private TextView countdownText;
+    private ImageView qrImage;
+    private TextView codeLabel;
 
     public static RedeemCodeDialog newInstance(String code, long expiresAtEpochMs) {
         RedeemCodeDialog f = new RedeemCodeDialog();
@@ -57,6 +59,8 @@ public class RedeemCodeDialog extends DialogFragment {
         View view = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_redeem_code, null);
         ImageView qr = view.findViewById(R.id.qrImage);
         TextView codeText = view.findViewById(R.id.codeText);
+        qrImage = qr;
+        codeLabel = codeText;
         countdownText = view.findViewById(R.id.countdownText);
 
         // Text code always shown, so the cashier can key it in even if the QR
@@ -91,7 +95,7 @@ public class RedeemCodeDialog extends DialogFragment {
         long remaining = expiresAtEpochMs - System.currentTimeMillis();
         if (remaining <= 0) {
             // Already past (e.g. clock skew): skip the timer, label it expired.
-            countdownText.setText(R.string.redeem_expired);
+            showExpired();
             return;
         }
         timer = new CountDownTimer(remaining, 1000) {
@@ -103,10 +107,16 @@ public class RedeemCodeDialog extends DialogFragment {
 
             @Override
             public void onFinish() {
-                countdownText.setText(R.string.redeem_expired);
+                showExpired();
             }
         };
         timer.start();
+    }
+
+    private void showExpired() {
+        qrImage.setVisibility(View.GONE);
+        codeLabel.setVisibility(View.GONE);
+        countdownText.setText("Expired — awaiting refund. You can cancel now to refund your points.");
     }
 
     @Override

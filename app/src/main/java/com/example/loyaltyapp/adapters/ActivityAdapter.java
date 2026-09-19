@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.loyaltyapp.R;
 import com.example.loyaltyapp.models.ActivityEvent;
@@ -68,26 +69,32 @@ public class ActivityAdapter extends RecyclerView.Adapter<ActivityAdapter.VH> {
             case ActivityEvent.TYPE_EARN:
                 h.activityIcon.setImageResource(R.drawable.ic_scan);
                 h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
-                h.activityPoints.setTextColor(0xFF4CAF50);
+                h.activityPoints.setTextColor(color(h, R.color.status_success));
                 break;
             case ActivityEvent.TYPE_REDEEM:
             case ActivityEvent.TYPE_EXPIRE:
                 h.activityIcon.setImageResource(R.drawable.ic_gift);
                 h.iconBackground.setBackgroundResource(R.drawable.circle_background_spend);
-                h.activityPoints.setTextColor(0xFFD32F2F);
+                h.activityPoints.setTextColor(color(h, R.color.status_error));
                 break;
             case ActivityEvent.TYPE_CANCEL:
                 // Refund: points come back, show as a credit.
                 h.activityIcon.setImageResource(R.drawable.ic_gift);
                 h.iconBackground.setBackgroundResource(R.drawable.circle_background_earn);
-                h.activityPoints.setTextColor(0xFF4CAF50);
+                h.activityPoints.setTextColor(color(h, R.color.status_success));
                 break;
             default: // birthday, adjust, unknown
                 h.activityIcon.setImageResource(R.drawable.ic_star);
                 h.iconBackground.setBackgroundResource(R.drawable.circle_background_bonus);
-                h.activityPoints.setTextColor(0xFFFFC107);
+                h.activityPoints.setTextColor(color(h, R.color.brand_gold));
                 break;
         }
+    }
+
+    // Resolved per bind against the holder's context so the point colours follow
+    // the active theme instead of being frozen at their light-theme values.
+    private static int color(@NonNull VH h, @androidx.annotation.ColorRes int colorRes) {
+        return ContextCompat.getColor(h.itemView.getContext(), colorRes);
     }
 
     @Override

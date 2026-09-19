@@ -1,10 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  BeanLoyal colour system.
+
+  Every colour the UI draws comes from a named token here. Tokens are grouped
+  by role, not by hue, so a rebrand means editing this file (plus the matching
+  values-night/colors.xml) instead of hunting hex literals across layouts.
+
+  Rules:
+    * Adaptive tokens are overridden in values-night/colors.xml.
+    * Tokens suffixed _fixed never adapt - they sit on artwork, gradients or the
+      camera preview, which are dark in every theme.
+    * Layouts should reference tokens or theme attributes (?attr/colorSurface),
+      never raw hex.
+-->
 <resources>
+
+    <!-- ===== Raw constants (compat / launcher only) ===== -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <!-- Light mode: very light grey (not pure white) -->
-    <color name="statusBarLight">#FAFAFA</color>
 
-    <!-- Dark mode: almost black, like Instagram -->
-    <color name="statusBarDark">#121212</color>
+    <!-- ===== Brand ===== -->
+    <!-- Roasted espresso brown: the single identity colour of the app. -->
+    <color name="brand_primary">#8B5A3C</color>
+    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_primary_dark">#6B4423</color>
+    <color name="brand_primary_container">#F3E7DE</color>
+    <color name="brand_on_primary_container">#4A2F1C</color>
+    <!-- Caramel: calls to action, promos, "bonus" states. -->
+    <color name="brand_accent">#D97424</color>
+    <color name="brand_accent_light">#FFA875</color>
+    <color name="brand_on_accent">#FFFFFF</color>
+    <!-- Latte: gradients and secondary brand surfaces. -->
+    <color name="brand_tertiary">#A67C52</color>
+    <!-- Gold: stars, ratings, tier badges. -->
+    <color name="brand_gold">#D9A02B</color>
+
+    <!-- Brand tones that must not adapt (gradients, artwork, on-photo chrome). -->
+    <color name="brand_primary_fixed">#8B5A3C</color>
+    <color name="brand_primary_dark_fixed">#6B4423</color>
+    <color name="brand_tertiary_fixed">#A67C52</color>
+    <color name="brand_accent_fixed">#D97424</color>
+    <color name="brand_accent_deep_fixed">#B4551A</color>
+    <color name="brand_accent_bright_fixed">#F09030</color>
+    <color name="on_brand_fixed">#FFFFFF</color>
+    <!-- Dimmed content on a fixed brand gradient (subtitles, captions). -->
+    <color name="on_brand_muted_fixed">#F3E2D6</color>
+
+    <!-- ===== Surfaces ===== -->
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_card">#FFFFFF</color>
+    <!-- Warm off-white: page backgrounds, so cards read as raised. -->
+    <color name="surface_container">#F7F2ED</color>
+    <color name="surface_muted">#F2EDE8</color>
+    <color name="outline">#E7DFD8</color>
+    <!-- Hairline borders on cards; brand-tinted rather than neutral grey. -->
+    <color name="outline_subtle">#338B5A3C</color>
+
+    <!-- ===== Content ===== -->
+    <color name="text_primary">#2A1D14</color>
+    <color name="text_secondary">#7B6A5D</color>
+    <color name="text_tertiary">#A99A8E</color>
+    <!-- Slightly dimmed content sitting on a filled brand surface. -->
+    <color name="text_on_brand_muted">#F3E2D6</color>
+    <color name="icon_default">#2A1D14</color>
+    <color name="icon_muted">#B0A399</color>
+
+    <!-- ===== Status ===== -->
+    <color name="status_success">#2E8B57</color>
+    <color name="status_success_container">#E4F3EA</color>
+    <color name="status_error">#C8443E</color>
+    <color name="status_error_strong">#A32B26</color>
+    <color name="status_error_container">#FBE9E7</color>
+    <color name="status_warning">#C98218</color>
+    <color name="status_info">#2F6CB5</color>
+    <color name="status_bonus">#D9772E</color>
+    <color name="on_status">#FFFFFF</color>
+
+    <!-- ===== Loyalty stamps ===== -->
+    <color name="stamp_filled">#8B5A3C</color>
+    <color name="stamp_empty">#E3D9D1</color>
+    <!-- Card highlight shown when a punch card is complete. -->
+    <color name="punch_card_highlight">#FFF3D6</color>
+
+    <!-- ===== Bottom navigation ===== -->
+    <color name="nav_surface">#FFFFFF</color>
+    <color name="nav_stroke">#1A8B5A3C</color>
+    <color name="nav_item_inactive">#A17A63</color>
+    <color name="nav_ripple">#338B5A3C</color>
+    <!-- Selected-item capsule: tonal, so the bar stays light while the active
+         tab still reads as brand. -->
+    <color name="nav_indicator">#F3E7DE</color>
+    <color name="nav_indicator_content">#8B5A3C</color>
+
+    <!-- ===== Scrims and camera chrome (never adapt) ===== -->
+    <color name="scrim_strong">#CC000000</color>
+    <color name="scrim_medium">#80000000</color>
+    <color name="scrim_soft">#66000000</color>
+    <color name="camera_backdrop">#000000</color>
+    <color name="camera_surface">#161210</color>
+    <color name="camera_text_primary">#F5F1ED</color>
+    <color name="camera_text_secondary">#BDB3AA</color>
+
+    <!--
+      Scanner chrome sits over a live camera preview, which is dark whatever the
+      system theme is, so these stay fixed: the espresso brand brown would drop
+      below the visibility floor against it.
+    -->
+    <color name="scan_accent_fixed">#E0A87F</color>
+    <color name="scan_line_core_fixed">#FFE0A87F</color>
+    <color name="scan_line_edge_fixed">#00E0A87F</color>
+    <color name="scan_success_fixed">#6ED598</color>
+    <color name="scan_error_fixed">#FF8A80</color>
+
 </resources>

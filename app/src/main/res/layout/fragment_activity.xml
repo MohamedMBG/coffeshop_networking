@@ -95,7 +95,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="Points Available"
                                     android:textSize="14sp"
-                                    android:textColor="#FFEBEE"/>
+                                    android:textColor="@color/on_brand_muted_fixed"/>
                             </LinearLayout>
 
                             <!-- Badge/Level -->
@@ -111,7 +111,7 @@
                                     android:layout_height="32dp"
                                     android:src="@drawable/ic_badge"
                                     android:contentDescription="Badge"
-                                    app:tint="#FFC107" />
+                                    app:tint="@color/brand_gold" />
 
                                 <TextView
                                     android:id="@+id/tvUserLevel"
@@ -152,13 +152,13 @@
                                     android:layout_height="wrap_content"
                                     android:text="Total Visits"
                                     android:textSize="13sp"
-                                    android:textColor="#FFEBEE"/>
+                                    android:textColor="@color/on_brand_muted_fixed"/>
                             </LinearLayout>
 
                             <View
                                 android:layout_width="1dp"
                                 android:layout_height="match_parent"
-                                android:background="#FFFFFF"
+                                android:background="?attr/colorSurface"
                                 android:alpha="0.3"
                                 android:layout_marginStart="8dp"
                                 android:layout_marginEnd="8dp"/>
@@ -184,7 +184,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="Last Scan"
                                     android:textSize="13sp"
-                                    android:textColor="#FFEBEE"/>
+                                    android:textColor="@color/on_brand_muted_fixed"/>
                             </LinearLayout>
                         </LinearLayout>
                     </LinearLayout>
@@ -221,7 +221,7 @@
                                 android:text="All"
                                 android:checked="true"
                                 app:chipBackgroundColor="@color/chip_background_selector"
-                                app:chipStrokeColor="#8B5A3C"
+                                app:chipStrokeColor="@color/brand_primary"
                                 app:chipStrokeWidth="1dp"/>
 
                             <com.google.android.material.chip.Chip
@@ -232,7 +232,7 @@
                                 android:textColor="@color/chip_text_selector"
                                 android:text="Scans"
                                 app:chipBackgroundColor="@color/chip_background_selector"
-                                app:chipStrokeColor="#8B5A3C"
+                                app:chipStrokeColor="@color/brand_primary"
                                 app:chipStrokeWidth="1dp"
                                 app:chipIcon="@drawable/ic_scan"/>
 
@@ -244,7 +244,7 @@
                                 android:text="Redemptions"
                                 android:textColor="@color/chip_text_selector"
                                 app:chipBackgroundColor="@color/chip_background_selector"
-                                app:chipStrokeColor="#8B5A3C"
+                                app:chipStrokeColor="@color/brand_primary"
                                 app:chipStrokeWidth="1dp"
                                 app:chipIcon="@drawable/ic_gift"/>
 
@@ -256,7 +256,7 @@
                                 android:text="Bonuses"
                                 android:textColor="@color/chip_text_selector"
                                 app:chipBackgroundColor="@color/chip_background_selector"
-                                app:chipStrokeColor="#8B5A3C"
+                                app:chipStrokeColor="@color/brand_primary"
                                 app:chipStrokeWidth="1dp"
                                 app:chipIcon="@drawable/ic_star"/>
                         </com.google.android.material.chip.ChipGroup>
@@ -284,7 +284,7 @@
                                 android:textColor="@color/chip_text_selector"
                                 android:text="This Week"
                                 app:chipBackgroundColor="@color/chip_background_selector"
-                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeColor="@color/brand_accent_light"
                                 app:chipStrokeWidth="1dp"/>
 
                             <com.google.android.material.chip.Chip
@@ -294,7 +294,7 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/chip_text_selector"
                                 android:text="This Month"
-                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeColor="@color/brand_accent_light"
                                 app:chipStrokeWidth="1dp"
                                 app:chipBackgroundColor="@color/chip_background_selector"/>
 
@@ -305,7 +305,7 @@
                                 android:textColor="@color/chip_text_selector"
                                 android:layout_height="wrap_content"
                                 android:text="Custom Range"
-                                app:chipStrokeColor="#FFA875"
+                                app:chipStrokeColor="@color/brand_accent_light"
                                 app:chipStrokeWidth="1dp"
                                 app:chipBackgroundColor="@color/chip_background_selector"
                                 app:chipIcon="@drawable/ic_calendar"/>
@@ -369,7 +369,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Scan QR Code"
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/brand_on_primary"
                             android:textStyle="bold"
                             android:background="@drawable/button_primary"
                             android:layout_marginTop="24dp"
@@ -384,7 +384,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:visibility="gone"
-                        android:indeterminateTint="#8B5A3C"/>
+                        android:indeterminateTint="@color/brand_primary"/>
                 </FrameLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

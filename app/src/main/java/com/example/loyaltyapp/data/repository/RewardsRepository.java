@@ -172,6 +172,31 @@ public class RewardsRepository {
         void onError(String message);
     }
 
+    public interface PendingCallback {
+        void onSuccess(ApiService.PendingReward pending);
+        void onError(String message);
+    }
+
+    public void pendingReward(PendingCallback cb) {
+        api.pendingReward().enqueue(new retrofit2.Callback<ApiResponse<ApiService.PendingRewardResult>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<ApiService.PendingRewardResult>> call,
+                                   Response<ApiResponse<ApiService.PendingRewardResult>> response) {
+                ApiResponse<ApiService.PendingRewardResult> body = response.body();
+                if (response.isSuccessful() && body != null && body.ok && body.data != null) {
+                    cb.onSuccess(body.data.pending);
+                } else {
+                    cb.onError(ApiErrors.messageFor(response));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<ApiService.PendingRewardResult>> call, Throwable error) {
+                cb.onError(ApiErrors.networkMessageFor(error));
+            }
+        });
+    }
+
     /**
      * Cancel a pending redeem (POST /rewards/redeem/cancel). The backend refunds
      * the points and clears the pending code — used to escape the one-pending

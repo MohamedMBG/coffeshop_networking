@@ -1,6 +1,7 @@
 package com.example.loyaltyapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,16 +24,21 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import android.util.Base64;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * SMTP + custom token flow:
- * 1) /api/register sends email with verify.html?token=...
+ * Device-bound email + custom token flow:
+ * 1) /auth/register sends a short-lived email link bound to a local verifier.
  * 2) Deep link myapp://verify?token=... opens here
- * 3) /api/verify -> { ok, email, customToken }
+ * 3) /auth/verify exchanges the link and local verifier for a custom token.
  * 4) signInWithCustomToken(customToken)
  * 5) Ensure user doc has full model; if missing fullName/birthday -> open
  * LoyaltyActivity on Profile tab
@@ -47,6 +53,8 @@ public class SignUpActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private ApiService api;
+    private SharedPreferences signInPrefs;
+    private boolean busy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +65,7 @@ public class SignUpActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         api = ApiClient.getClient().create(ApiService.class);
+        signInPrefs = getSharedPreferences("email_signin", MODE_PRIVATE);
 
         binding.continueButton.setOnClickListener(v -> onContinue());
 
@@ -74,7 +83,7 @@ public class SignUpActivity extends AppCompatActivity {
                         }
                     })
                     .addOnFailureListener(e -> Log.w("FCM", "existing user getToken failed"));
-            goToMain(false);
+            ensureUserDocAndRoute(u.getUid(), u.getEmail());
             return;
         }
 
@@ -90,6 +99,7 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void onContinue() {
+        if (busy) return;
         String email = binding.EmailInput.getText() == null ? "" : binding.EmailInput.getText().toString().trim();
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.EmailInput.setError("Enter a valid email");
@@ -98,20 +108,43 @@ public class SignUpActivity extends AppCompatActivity {
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
+        String normalizedEmail = email.toLowerCase(Locale.ROOT);
+        String verifier = signInPrefs.getString("verifier", null);
+        // Reuse for resend/retry so an earlier delivered email remains usable on this phone.
+        if (verifier == null || !normalizedEmail.equals(signInPrefs.getString("email", null))) {
+            byte[] bytes = new byte[32];
+            new SecureRandom().nextBytes(bytes);
+            verifier = Base64.encodeToString(bytes, Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
+            if (!signInPrefs.edit().putString("verifier", verifier).putString("email", normalizedEmail).commit()) {
+                toast("Could not save sign-in request. Please try again.");
+                return;
+            }
+        }
+        try {
+            body.put("challenge", Base64.encodeToString(MessageDigest.getInstance("SHA-256")
+                    .digest(verifier.getBytes(StandardCharsets.UTF_8)),
+                    Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
+        setBusy(true);
 
         api.registerEmail(body).enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> resp) {
+                setBusy(false);
                 if (resp.isSuccessful() && resp.body() != null && Boolean.TRUE.equals(resp.body().get("ok"))) {
-                    toast("Verification email sent. Check your inbox.");
+                    toast("Email sent. Open the link on this phone. Check spam too.");
                 } else {
-                    toast("Failed to send verification.");
+                    toast(resp.code() == 429 ? "Too many requests. Please wait before trying again."
+                            : "Could not send email. Please try again later.");
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                toast("Network error: " + t.getMessage());
+                setBusy(false);
+                toast("Could not connect. Check your connection and try again.");
             }
         });
     }
@@ -132,8 +165,17 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void verifyAndSignIn(@NonNull String token) {
+        if (busy) return;
+        String verifier = signInPrefs.getString("verifier", null);
+        if (verifier == null || !token.matches("[A-Za-z0-9_-]{43}")) {
+            toast("Request an email on this phone, then open its link here.");
+            return;
+        }
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
+        body.put("verifier", verifier);
+        setBusy(true);
+        getIntent().setData(null);
 
         api.verifyToken(body).enqueue(new Callback<VerifyResponse>() {
             @Override
@@ -141,7 +183,12 @@ public class SignUpActivity extends AppCompatActivity {
                 VerifyResponse vr = resp.body();
                 if (!resp.isSuccessful() || vr == null || !vr.ok || vr.customToken == null
                         || vr.customToken.isEmpty()) {
-                    toast("Verification failed.");
+                    setBusy(false);
+                    // A refused account and a stale link need different fixes, so show the
+                    // server's reason instead of blaming the link for both.
+                    toast(resp.isSuccessful()
+                            ? "Sign-in unavailable. Request a new email on this phone."
+                            : ApiErrors.messageFor(resp));
                     return;
                 }
 
@@ -149,11 +196,13 @@ public class SignUpActivity extends AppCompatActivity {
                         .addOnSuccessListener(cred -> {
                             FirebaseUser fu = cred.getUser();
                             if (fu == null) {
+                                setBusy(false);
                                 toast("Auth error.");
                                 return;
                             }
 
                             Log.i(TAG, "Sign-in OK: " + fu.getUid());
+                            signInPrefs.edit().clear().apply();
                             ensureUserDocAndRoute(fu.getUid(), vr.email);
 
                             // Force-get FCM token once after fresh sign-in and upsert it.
@@ -169,13 +218,15 @@ public class SignUpActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "signInWithCustomToken failed", e);
-                            toast("Sign-in failed: " + e.getMessage());
+                            setBusy(false);
+                            toast("Sign-in could not finish. Request a new email and try again.");
                         });
             }
 
             @Override
             public void onFailure(Call<VerifyResponse> call, Throwable t) {
-                toast("Network error: " + t.getMessage());
+                setBusy(false);
+                toast("Connection interrupted. Request a new email if this link no longer works.");
             }
         });
     }
@@ -186,7 +237,7 @@ public class SignUpActivity extends AppCompatActivity {
      * We DO NOT overwrite points/visits; we just ensure keys/timestamps exist.
      */
     private void ensureUserDocAndRoute(@NonNull String uid, String emailFromVerify) {
-        final String emailLower = emailFromVerify != null ? emailFromVerify.toLowerCase() : null;
+        final String emailLower = emailFromVerify != null ? emailFromVerify.toLowerCase(Locale.ROOT) : null;
 
         DocumentReference userRef = db.collection("users").document(uid);
         userRef.get().addOnSuccessListener(doc -> {
@@ -203,6 +254,15 @@ public class SignUpActivity extends AppCompatActivity {
             String emailInDoc = exists ? doc.getString("email") : null;
 
             boolean profileComplete = profileCompleteB != null && profileCompleteB;
+
+            // The email backend creates the profile. Existing profiles need no client write
+            // just to sign in (also avoids older deployed rules rejecting uid/updatedAt).
+            if (exists) {
+                goToMain(!profileComplete || fullName == null || fullName.trim().isEmpty()
+                        || birthday == null || birthday.trim().isEmpty()
+                        || gender == null || gender.trim().isEmpty());
+                return;
+            }
 
             Map<String, Object> up = new HashMap<>();
             up.put("uid", uid);
@@ -255,5 +315,11 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void toast(String s) {
         Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
+    }
+
+    private void setBusy(boolean value) {
+        busy = value;
+        binding.continueButton.setEnabled(!value);
+        binding.EmailInput.setEnabled(!value);
     }
 }
